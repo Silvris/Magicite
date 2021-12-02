@@ -16,7 +16,7 @@ namespace Magicite
 {
     static class ResourceGeneration
     {
-
+        public static AssetBundle DonorAssets { get; set; }
         public static Texture2D ReadTextureFromFile(String fullPath, String Name)
         {
             try
@@ -65,7 +65,7 @@ namespace Magicite
         {
             //Unity doesn't really support proper access to SpriteAtlases in scripting, so instead we provide a "dummy"
             //SpriteAtlas that calls its individual sprites on the GetSprite and GetSprites functions
-            SpriteAtlas atlas = new SpriteAtlas();
+            SpriteAtlas atlas = DonorAssets.LoadAsset<SpriteAtlas>("Magicite/DonorAtlas.spriteatlas");
             atlas.name = name;
             //now generate the needed information for our Atlas functions to run
             AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Path.GetDirectoryName(fullPath)));
