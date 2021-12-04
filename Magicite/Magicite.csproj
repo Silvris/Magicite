@@ -129,6 +129,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager_CheckCompleteAsset.cs" />
     <Compile Include="SpriteData.cs" />
+    <Compile Include="TextAsset_bytesPatch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

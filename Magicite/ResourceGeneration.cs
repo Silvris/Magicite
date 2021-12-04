@@ -16,7 +16,7 @@ namespace Magicite
 {
     static class ResourceGeneration
     {
-        public static AssetBundle DonorAssets { get; set; }
+        public static Dictionary<string,UnityEngine.Object> DonorAssets { get; set; }
         public static Texture2D ReadTextureFromFile(String fullPath, String Name)
         {
             try
@@ -26,7 +26,7 @@ namespace Magicite
                 texture.filterMode = FilterMode.Point;
                 if (!ImageConversion.LoadImage(texture, bytes))
                     throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
-
+                texture.hideFlags = HideFlags.HideAndDontSave;
                 return texture;
             }
             catch (Exception ex)
@@ -35,7 +35,10 @@ namespace Magicite
             }
 
         }
-
+        public static TextAsset CreateBinaryTextAsset(string fullPath)
+        {
+            return new TextAsset("MAGI" + fullPath);
+        }
         public static Sprite CreateSprite(Texture2D tex,SpriteData sd)
         {
             Sprite spr = Sprite.Create(
@@ -49,6 +52,7 @@ namespace Magicite
                 );
             tex.wrapMode = sd.hasWrap ? sd.wrapMode : TextureWrapMode.Clamp;
             spr.name = sd.name;
+            spr.hideFlags = HideFlags.HideAndDontSave;
             return spr;
         }
         public static Dictionary<string,SpriteData> ReadSpriteAtlas(string[] lines, string basePath)
@@ -56,7 +60,7 @@ namespace Magicite
             Dictionary<string, SpriteData> sds = new Dictionary<string, SpriteData>();
             foreach(string line in lines)
             {
-                SpriteData data = new SpriteData(File.ReadAllLines(basePath + line.Replace("\n","").Replace("\r","")), line);
+                SpriteData data = new SpriteData(File.ReadAllLines(basePath + "/" + line.Replace("\n","").Replace("\r","") + ".spritedata"), line);
                 sds.Add(line,data);
             }
             return sds;
@@ -65,8 +69,10 @@ namespace Magicite
         {
             //Unity doesn't really support proper access to SpriteAtlases in scripting, so instead we provide a "dummy"
             //SpriteAtlas that calls its individual sprites on the GetSprite and GetSprites functions
-            SpriteAtlas atlas = DonorAssets.LoadAsset<SpriteAtlas>("Magicite/DonorAtlas.spriteatlas");
+            SpriteAtlas atlas = UnityEngine.Object.Instantiate(DonorAssets["SpriteAtlas"]).Cast<SpriteAtlas>();
+            //I'm really hoping this doesn't grab the same asset twice
             atlas.name = name;
+            //EntryPoint.Instance.Log.LogInfo(atlas.name);
             //now generate the needed information for our Atlas functions to run
             AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Path.GetDirectoryName(fullPath)));
             AtlasManager.Atlases.Add(ad);

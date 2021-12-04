@@ -21,6 +21,7 @@ namespace Magicite
         public string BasePath { get; set; }
         public AtlasData(string name, string basePath, Dictionary<string, SpriteData> sprites)
         {
+            EntryPoint.Instance.Log.LogInfo("AtlasData.ctor");
             Name = name;
             BasePath = basePath;
             Sprites = sprites;
@@ -28,9 +29,10 @@ namespace Magicite
 
         public Sprite GetSprite(string name)
         {
+            EntryPoint.Instance.Log.LogInfo("AtlasData.GetSprite");
             if (Sprites.ContainsKey(name))
             {
-                return ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + name, name), Sprites[name]);
+                return ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + "/" + name + ".png", name), Sprites[name]);
             }
             else
             {
@@ -39,10 +41,11 @@ namespace Magicite
         }
         public Sprite[] GetSprites()
         {
+            EntryPoint.Instance.Log.LogInfo("AtlasData.GetSprites");
             List<Sprite> sprites = new List<Sprite>();
             foreach(KeyValuePair<string, SpriteData> sp in Sprites)
             {
-                sprites.Add(ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + sp.Key, sp.Key), sp.Value));
+                sprites.Add(ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + "/" + sp.Key + ".png", sp.Key), sp.Value));
             }
             return sprites.ToArray();
         }
@@ -52,10 +55,12 @@ namespace Magicite
     {
         public static bool Prefix(string name, SpriteAtlas __instance,ref Sprite __result)
         {
+            EntryPoint.Instance.Log.LogInfo("SpriteAtlas.GetSprite");
             AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
             if(ad != null)
             {
                 __result = ad.GetSprite(name);
+                EntryPoint.Instance.Log.LogInfo(__result.name);
                 return false;
             }
             else
@@ -69,11 +74,19 @@ namespace Magicite
     {
         public static bool Prefix(ref Il2CppReferenceArray<Sprite> sprites, SpriteAtlas __instance, ref int __result)
         {
+            EntryPoint.Instance.Log.LogInfo("SpriteAtlas.GetSprites");
+            //EntryPoint.Instance.Log.LogInfo($"{AtlasManager.Atlases[0].Name} == {__instance.name} = {AtlasManager.Atlases[0].Name == __instance.name}");
             AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
+            //EntryPoint.Instance.Log.LogInfo(ad.Name);
             if (ad != null)
             {
                 __result = ad.Sprites.Count;
-                sprites = ad.GetSprites();
+                Sprite[] sprs = ad.GetSprites();
+                if (sprs.Length != sprites.Length) return true;
+                for(int i = 0; i < sprs.Length; i++)
+                {
+                    sprites[i] = sprs[i];
+                }
                 return false;
             }
             else

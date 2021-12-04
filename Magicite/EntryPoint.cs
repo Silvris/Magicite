@@ -46,7 +46,10 @@ namespace Magicite
                     throw new Exception($"The object is missing the required component: {name}");
                 }
                 Assembly self = Assembly.GetExecutingAssembly();
-                ResourceGeneration.DonorAssets = AssetBundle.LoadFromFile(Path.GetDirectoryName(self.Location) + "/Magicite.bundle");
+                AssetBundle reqs = AssetBundle.LoadFromFile(Path.GetDirectoryName(self.Location) + "/Magicite.bundle");
+                ResourceGeneration.DonorAssets = new Dictionary<string, UnityEngine.Object>();
+                ResourceGeneration.DonorAssets.Add("SpriteAtlas", reqs.LoadAsset<SpriteAtlas>("Magicite/DonorAtlas.spriteatlas"));
+                reqs.Unload(false);
                 PatchMethods();
             }
             catch(Exception ex)
