@@ -20,7 +20,7 @@ namespace Magicite
         public Configuration()
         {
             ConfigFile file = EntryPoint.Instance.Config;
-            _ImportDirectory = file.Bind(new ConfigDefinition("Magicite Paths", "Import Directory"), "%StreamingAssets%/Magicite", new ConfigDescription("The import directory for custom asset files."));
+            _ImportDirectory = file.Bind(new ConfigDefinition("Magicite Paths", "Import Directory"), "%StreamingAssets%/Magicite", new ConfigDescription("The import directory for custom asset files.\n\n Available replacements:\n%StreamingAssets% - StreamingAssets folder\n%DataPath% - \"FINAL FANTASY_Data\" folder\n%PersistentData% - \"AppData/LocalLow/SQUARE ENIX, Inc_/FINAL FANTASY\""));
         }
         public string ImportDirectory => _ImportDirectory.Value.Replace("%StreamingAssets%", StreamingAssets).Replace("%DataPath%", DataPath).Replace("%PersistentData%", PersistentData);
     }

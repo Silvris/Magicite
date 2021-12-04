@@ -95,7 +95,7 @@ namespace Magicite
                         return tex;
                     }
                 case ".atlas":
-                    EntryPoint.Instance.Log.LogInfo(fullPath);
+                    //EntryPoint.Instance.Log.LogInfo(fullPath);
                     return ResourceGeneration.CreateSpriteAtlas(Path.GetFileNameWithoutExtension(fullPath), fullPath);
                 case ".bytes":
                     TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(fullPath);
@@ -183,8 +183,8 @@ namespace Magicite
                             if(ext != String.Empty)
                             {
                                 UnityEngine.Object asset = LoadAsset(file, ext);
-                                EntryPoint.Instance.Log.LogInfo(file);
-                                EntryPoint.Instance.Log.LogInfo(asset);
+                                //EntryPoint.Instance.Log.LogInfo(file);
+                                //EntryPoint.Instance.Log.LogInfo(asset);
                                 if(asset != null)
                                 {
                                     if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
