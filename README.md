@@ -2,7 +2,7 @@
 A BepInEx plugin for the FINAL FANTASY PIXEL REMASTERS that allows for the loading of new assets and replacement of existing assets
 
 # To-do List
-* Implement some system of multiple keys.json as to not have to deal with manually merging between similar mods
+* Go through and make sure missing directories don't kill the plugin
 * Implement GameObject serialization
 
 # Installation:
@@ -11,11 +11,15 @@ A BepInEx plugin for the FINAL FANTASY PIXEL REMASTERS that allows for the loadi
 3. Run the game to generate the configuration file, and then place any added mods to designated path in the config file.
 
 # Creating Mods for Magicite:
-Each file within the Pixel Remasters is given a "group" entry and then a full path to the file. Magicite reads each folder in the chosen directory as it's own group, and reads
-keys.json file within each folder. These define the files that Magicite should manage and load. To edit files that are present within the game by default, use the same group name as 
-the original file (this can be found in the AssetsPath.json present in the asset bundles), as well as the same key. Using the same path is recommended, but not necessarily required.
+Each file within the Pixel Remasters is given a "group" entry and then a full path to the file. 
+Magicite reads each folder in the chosen directory as it's own group, and reads json files within the "keys" directory within each folder. 
+These define the files that Magicite should manage and load. 
+To edit files that are present within the game by default, use the same group name as the original file (this can be found in the AssetsPath.json present in the asset bundles), as well as the same key. 
+Using the same path is recommended, but not necessarily required.
 
-Each keys.json has two major values: "keys" and "values". Keys are the given name of each file, normally just the name of the file without path or extension. The value of a key
+Each json has two major values: "keys" and "values". 
+Keys are the given name of each file, normally just the name of the file without path or extension. 
+The value of a key is the full path to the file within the group folder.
 
 Magicite supports the following file types:
 * .txt - TextAsset
@@ -27,10 +31,11 @@ Magicite supports the following file types:
 
 *The .bytes extension signifies a binary file that is to be loaded as a TextAsset. This is mainly used for the Pixel Remaster's music.
 
-**In order to load a .png as a Sprite, an accompanying .spritedata must be present within the folder. [SpriteData information can be found here.](#SpriteData).
+**In order to load a .png as a Sprite, an accompanying .spritedata must be present within the folder. [SpriteData information can be found here.](#SpriteData)
 Without a .spritedata, the .png will be loaded as a Texture2D.
 
-***The .atlas is a text file that has the names of the Sprites it should pack within it (each separated by Enter/Return). Each Sprite *must* have a .spritedata accompanying.
+***The .atlas is a text file that has the names of the Sprites it should pack within it (each separated by Enter/Return). 
+Each Sprite *must* have a .spritedata accompanying.
 
 # SpriteData:
 SpriteData attributes can be accessed by creating a .txt file, filling in the wanted parameters, and then renaming the file extension to .spriteData.
@@ -43,7 +48,6 @@ SpriteData exposes the following parameters:
 * WrapMode = Texture2D parameter that defines wrapping on the texture - options are Clamp, Repeat, Mirror, MirrorOnce
 
 # Examples
-A set of [example mods](https://drive.google.com/file/d/1m9FVivUR1uHkpvxd7lV8dK3MJcR89dpi/view?usp=sharing) for FINAL FANTASY III using Magicite. They can be used for understanding 
-the structure needed for a mod.
+A set of [example mods](https://drive.google.com/file/d/1DF8jZuRwLwCPqCkxAIsjBICa35Z__frJ/view?usp=sharing) for FINAL FANTASY III using Magicite. They can be used for understanding the structure needed for a mod.
 
 NOTE: the FF3 DS sprites in the example were created by M3CH4 N1NJ4 on Discord. These will eventually be included in a proper set of FF3 DS sprites, when time allows for it.
