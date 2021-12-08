@@ -341,3 +341,4 @@ healthchecksdb
 
 #Release directory
 BepInEx/
+*.zip
