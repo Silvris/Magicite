@@ -44,7 +44,7 @@ namespace Magicite
                     EntryPoint.Instance.Log.LogWarning($"SpriteData [{name}]: Invalid entry (unable to distinguish key)");
                     return;
                 }
-                EntryPoint.Instance.Log.LogInfo(kvp[0].ToLower());
+                //EntryPoint.Instance.Log.LogInfo(kvp[0].ToLower());
                 switch (kvp[0].ToLower())
                 {
                     case "rect":

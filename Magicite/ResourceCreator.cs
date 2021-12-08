@@ -3,8 +3,9 @@ using System;
 using Il2CppSystem.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+//using System.Text.Json;
 using System.Threading.Tasks;
+//using System.Web.Script.Serialization;
 using UnityEngine;
 using Il2CppSystem.Asset;
 
@@ -121,42 +122,36 @@ namespace Magicite
         }
         public void AddFiles()
         {
-            String[] groups;
+            List<string> groups = new List<string>();
             try
             {
-                groups = Directory.GetDirectories(ImportDirectory);
+                System.Collections.Generic.List<string> group = Directory.GetDirectories(ImportDirectory).ToList();
+                foreach (string g in group)
+                {
+                    groups.Add(g);
+                }
             }
             catch(Exception ex)
             {
                 EntryPoint.Instance.Log.LogError($"[ResourceCreator.AddFiles]: {ex}");
                 return;
             }
-            List<string> keys = new List<string>();
-            int iterator = 0;
+            JsonDict assetsPathData = new JsonDict();
             foreach(String group in groups)
             {
                 //ModComponent.Log.LogInfo(group + "/keys.json");
+                /*
                 if(File.Exists(group + "/keys.json"))
                 {
                     keys.Add(File.ReadAllText(group + "/keys.json"));
+                }*/
+                if(Directory.Exists(group + "/keys"))
+                {
+                    assetsPathData.keys.Add(Path.GetFileName(group));
+                    assetsPathData.values.Add(JsonHandling.ToJson(JsonHandling.MergeJsonDictsInPath(group + "/keys", Path.GetFileName(group))));
                 }
             }
-            String assetsPathtxt = "{\"keys\": [ ";
-            foreach (String group in groups)
-            {
-                if (iterator != 0) assetsPathtxt += ",";
-                assetsPathtxt += $"\"{Path.GetFileName(group)}\"";
-                iterator++;
-            }
-            assetsPathtxt += "], \"values\": [";
-            iterator = 0;
-            foreach (String kvd in keys)
-            {
-                if (iterator != 0) assetsPathtxt += ",";
-                assetsPathtxt += $"\"{kvd.Replace("\n",String.Empty).Replace("\t",String.Empty).Replace("\r",String.Empty).Replace("\"","\\\"")}\"";
-                iterator++;
-            }
-            assetsPathtxt += "]}";
+            String assetsPathtxt = JsonHandling.ToJson(assetsPathData);
             //EntryPoint.Instance.Log.LogInfo(assetsPathtxt);
             OurFiles = AssetPathUtilty.Parse(assetsPathtxt);
             if(OurFiles != null)
@@ -166,6 +161,8 @@ namespace Magicite
                 {
                     foreach (KeyValuePair<string, string> kvp in group.Value)
                     {
+                        //EntryPoint.Instance.Log.LogInfo(group.key);
+                        //EntryPoint.Instance.Log.LogInfo(kvp.value);
                         var fileGrab = Directory.GetFiles(ImportDirectory + $"\\{group.key}", $"{kvp.value}.*");
                         List<string> files = new List<string>();
                         foreach (string file in fileGrab)

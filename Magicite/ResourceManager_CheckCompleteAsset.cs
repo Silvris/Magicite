@@ -17,11 +17,17 @@ namespace Magicite
             {
                 if (__instance.completeAssetDic.ContainsKey(addressName))
                 {
-                    return true;
+                    if (!(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID() == ResourceCreator.loadedFiles[addressName].GetInstanceID()))
+                    {
+                        //EntryPoint.Instance.Log.LogInfo(addressName);
+                        __instance.completeAssetDic[addressName] = ResourceCreator.loadedFiles[addressName];
+                        return true;
+                    }
+                    else return true;
                 }
                 else
                 {
-                    EntryPoint.Instance.Log.LogInfo(addressName);
+                   // EntryPoint.Instance.Log.LogInfo(addressName);
                     __instance.completeAssetDic.Add(addressName, ResourceCreator.loadedFiles[addressName]);
                     __result = true;
                     return true;
