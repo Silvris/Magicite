@@ -1,10 +1,6 @@
 # Magicite
 A BepInEx plugin for the FINAL FANTASY PIXEL REMASTERS that allows for the loading of new assets and replacement of existing assets
 
-# To-do List
-* Go through and make sure missing directories don't kill the plugin
-* Implement GameObject serialization
-
 # Installation:
 1. Install a Bleeding-Edge build of BepInEx 6, which can be found [here](https://builds.bepis.io/projects/bepinex_be) or used from a prior Memoria installation
 2. Drop the BepInEx folder from the mod into the game's main directory and merge folders if prompted
@@ -51,3 +47,7 @@ SpriteData exposes the following parameters:
 A set of [example mods](https://drive.google.com/file/d/1DF8jZuRwLwCPqCkxAIsjBICa35Z__frJ/view?usp=sharing) for FINAL FANTASY III using Magicite. They can be used for understanding the structure needed for a mod.
 
 NOTE: the FF3 DS sprites in the example were created by M3CH4 N1NJ4 on Discord. These will eventually be included in a proper set of FF3 DS sprites, when time allows for it.
+
+# To-do List
+* Go through and make sure missing directories don't kill the plugin
+* Implement GameObject serialization
