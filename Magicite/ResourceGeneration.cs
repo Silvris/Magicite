@@ -55,12 +55,24 @@ namespace Magicite
             spr.hideFlags = HideFlags.HideAndDontSave;
             return spr;
         }
-        public static Dictionary<string,SpriteData> ReadSpriteAtlas(string[] lines, string basePath)
+        public static Dictionary<string,Sprite> ReadSpriteAtlas(string[] lines, string basePath)
         {
-            Dictionary<string, SpriteData> sds = new Dictionary<string, SpriteData>();
+            Dictionary<string, Sprite> sds = new Dictionary<string, Sprite>();
             foreach(string line in lines)
             {
-                SpriteData data = new SpriteData(File.ReadAllLines(basePath + "/" + line.Replace("\n","").Replace("\r","") + ".spritedata"), line);
+                string name = line.Replace("\n", "").Replace("\r", "");
+                string path = basePath + "/" + name;
+                string key = path.Replace(EntryPoint.Configuration.ImportDirectory, "");
+                Sprite data;
+                if (ResourceCreator.loadedFiles.ContainsKey(key))
+                {
+                    data = ResourceCreator.loadedFiles[key].Cast<Sprite>();
+                }
+                else
+                {
+                    data = CreateSprite(ReadTextureFromFile(path + ".png", name), new SpriteData(File.ReadAllLines(path + ".spritedata"), name));
+                    ResourceCreator.loadedFiles.Add(key, data);
+                }
                 sds.Add(line,data);
             }
             return sds;

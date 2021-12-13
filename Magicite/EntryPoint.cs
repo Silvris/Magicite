@@ -29,6 +29,7 @@ namespace Magicite
         {
             try
             {
+
                 Instance = this;
                 Configuration = new Configuration();
                 Log.LogInfo("Loading...");

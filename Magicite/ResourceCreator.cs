@@ -81,6 +81,7 @@ namespace Magicite
                 case ".txt":
                 case ".json":
                     TextAsset asset = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
+                    asset.name = Path.GetFileNameWithoutExtension(fullPath);
                     return asset;
                 case ".png":
                     //check for .spriteData, with we define asset as Sprite, without we just load T2D itself
@@ -100,6 +101,7 @@ namespace Magicite
                     return ResourceGeneration.CreateSpriteAtlas(Path.GetFileNameWithoutExtension(fullPath), fullPath);
                 case ".bytes":
                     TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(fullPath);
+                    binary.name = Path.GetFileNameWithoutExtension(fullPath);
                     return binary;
                 default:
                     return null;
@@ -161,39 +163,43 @@ namespace Magicite
                 {
                     foreach (KeyValuePair<string, string> kvp in group.Value)
                     {
-                        //EntryPoint.Instance.Log.LogInfo(group.key);
-                        //EntryPoint.Instance.Log.LogInfo(kvp.value);
-                        var fileGrab = Directory.GetFiles(ImportDirectory + $"\\{group.key}", $"{kvp.value}.*");
-                        List<string> files = new List<string>();
-                        foreach (string file in fileGrab)
+                        if (!loadedFiles.ContainsKey(kvp.value)) //this allows us to register sprites loaded by atlas generation, and then ignore them here
                         {
-                            if (ImportableFile(file))
+                            //EntryPoint.Instance.Log.LogInfo(group.key);
+                            //EntryPoint.Instance.Log.LogInfo(kvp.value);
+                            var fileGrab = Directory.GetFiles(ImportDirectory + $"\\{group.key}", $"{kvp.value}.*");
+                            List<string> files = new List<string>();
+                            foreach (string file in fileGrab)
                             {
-                                files.Add(file);
-                            }
-                        }
-                        if(files.Count > 0)
-                        {
-                            //at least one file exists, we're gonna just use the first one as to force unique keys
-                            string file = files[0];
-                            string ext = Path.GetExtension(file);
-                            if(ext != String.Empty)
-                            {
-                                UnityEngine.Object asset = LoadAsset(file, ext);
-                                //EntryPoint.Instance.Log.LogInfo(file);
-                                //EntryPoint.Instance.Log.LogInfo(asset);
-                                if(asset != null)
+                                if (ImportableFile(file))
                                 {
-                                    if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
+                                    files.Add(file);
+                                }
+                            }
+                            if (files.Count > 0)
+                            {
+                                //at least one file exists, we're gonna just use the first one as to force unique keys
+                                string file = files[0];
+                                string ext = Path.GetExtension(file);
+                                if (ext != String.Empty)
+                                {
+                                    UnityEngine.Object asset = LoadAsset(file, ext);
+                                    //EntryPoint.Instance.Log.LogInfo(file);
+                                    //EntryPoint.Instance.Log.LogInfo(asset);
+                                    if (asset != null)
                                     {
-                                        resourceManager.completeAssetDic[kvp.value] = asset;
+                                        if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
+                                        {
+                                            resourceManager.completeAssetDic[kvp.value] = asset;
+                                        }
+                                        //there used to be an else, but I realized that since the resourceManager hook should catch every file
+                                        //that we can just need to worry about ones already present in the assetDic
+                                        loadedFiles.Add(kvp.value, asset);//this should let us maintain it
                                     }
-                                    //there used to be an else, but I realized that since the resourceManager hook should catch every file
-                                    //that we can just need to worry about ones already present in the assetDic
-                                    loadedFiles.Add(kvp.value, asset);//this should let us maintain it
                                 }
                             }
                         }
+                        
                     }
                     if (pathMatch.ContainsKey(group.key))
                     {

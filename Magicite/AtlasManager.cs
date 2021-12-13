@@ -16,10 +16,10 @@ namespace Magicite
     }
     public class AtlasData
     {
-        public Dictionary<string,SpriteData> Sprites = new Dictionary<string, SpriteData>();
+        public Dictionary<string,Sprite> Sprites = new Dictionary<string, Sprite>();
         public string Name { get; set; }
         public string BasePath { get; set; }
-        public AtlasData(string name, string basePath, Dictionary<string, SpriteData> sprites)
+        public AtlasData(string name, string basePath, Dictionary<string, Sprite> sprites)
         {
             //EntryPoint.Instance.Log.LogInfo("AtlasData.ctor");
             Name = name;
@@ -32,7 +32,7 @@ namespace Magicite
             //EntryPoint.Instance.Log.LogInfo("AtlasData.GetSprite");
             if (Sprites.ContainsKey(name))
             {
-                return ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + "/" + name + ".png", name), Sprites[name]);
+                return UnityEngine.Object.Instantiate(Sprites[name]);
             }
             else
             {
@@ -43,9 +43,9 @@ namespace Magicite
         {
             //EntryPoint.Instance.Log.LogInfo("AtlasData.GetSprites");
             List<Sprite> sprites = new List<Sprite>();
-            foreach(KeyValuePair<string, SpriteData> sp in Sprites)
+            foreach(KeyValuePair<string, Sprite> sp in Sprites)
             {
-                sprites.Add(ResourceGeneration.CreateSprite(ResourceGeneration.ReadTextureFromFile(BasePath + "/" + sp.Key + ".png", sp.Key), sp.Value));
+                sprites.Add(UnityEngine.Object.Instantiate(sp.Value));
             }
             return sprites.ToArray();
         }
@@ -82,7 +82,7 @@ namespace Magicite
             {
                 __result = ad.Sprites.Count;
                 Sprite[] sprs = ad.GetSprites();
-                if (sprs.Length != sprites.Length) return true;
+                if (sprs.Length != sprites.Length) return true;//might need to remove this safeguard
                 for(int i = 0; i < sprs.Length; i++)
                 {
                     sprites[i] = sprs[i];
@@ -101,6 +101,7 @@ namespace Magicite
     {
         public static void Postfix(SpriteAtlas __instance, ref int __result)
         {
+            //EntryPoint.Instance.Log.LogInfo("SpriteAtlas.spriteCount.getter");
             AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
             if (ad != null)
             {

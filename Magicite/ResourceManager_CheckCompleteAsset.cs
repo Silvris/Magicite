@@ -13,6 +13,7 @@ namespace Magicite
     {
         public static bool Prefix(string addressName, ResourceManager __instance, ref bool __result)
         {
+            //EntryPoint.Instance.Log.LogInfo("ResourceManager.CheckCompleteAsset");
             if (ResourceCreator.loadedFiles.ContainsKey(addressName))
             {
                 if (__instance.completeAssetDic.ContainsKey(addressName))
@@ -29,7 +30,7 @@ namespace Magicite
                 {
                    // EntryPoint.Instance.Log.LogInfo(addressName);
                     __instance.completeAssetDic.Add(addressName, ResourceCreator.loadedFiles[addressName]);
-                    __result = true;
+                    //__result = true;
                     return true;
                 }
             }
