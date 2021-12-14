@@ -37,7 +37,9 @@ namespace Magicite
         }
         public static TextAsset CreateBinaryTextAsset(string fullPath)
         {
-            return new TextAsset("MAGI" + fullPath);
+            TextAsset binary = new TextAsset("MAGI" + fullPath);
+            binary.hideFlags = HideFlags.HideAndDontSave;
+            return binary;
         }
         public static Sprite CreateSprite(Texture2D tex,SpriteData sd)
         {
@@ -88,11 +90,14 @@ namespace Magicite
             //now generate the needed information for our Atlas functions to run
             AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Path.GetDirectoryName(fullPath)));
             AtlasManager.Atlases.Add(ad);
+            atlas.hideFlags = HideFlags.HideAndDontSave;
             return atlas;
         }
         public static TextAsset CreateTextAsset(string data)
         {
-            return new TextAsset(data);
+            TextAsset text =  new TextAsset(data);
+            text.hideFlags = HideFlags.HideAndDontSave;
+            return text;
         }
     }
 }

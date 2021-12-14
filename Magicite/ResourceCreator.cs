@@ -190,7 +190,7 @@ namespace Magicite
                                     {
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
-                                            resourceManager.completeAssetDic[kvp.value] = asset;
+                                            resourceManager.completeAssetDic[kvp.value] = Instantiate(asset);
                                         }
                                         //there used to be an else, but I realized that since the resourceManager hook should catch every file
                                         //that we can just need to worry about ones already present in the assetDic

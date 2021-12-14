@@ -21,7 +21,7 @@ namespace Magicite
                     if (!(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID() == ResourceCreator.loadedFiles[addressName].GetInstanceID()))
                     {
                         //EntryPoint.Instance.Log.LogInfo(addressName);
-                        __instance.completeAssetDic[addressName] = ResourceCreator.loadedFiles[addressName];
+                        __instance.completeAssetDic[addressName] = UnityEngine.Object.Instantiate(ResourceCreator.loadedFiles[addressName]);
                         return true;
                     }
                     else return true;
@@ -29,7 +29,7 @@ namespace Magicite
                 else
                 {
                    // EntryPoint.Instance.Log.LogInfo(addressName);
-                    __instance.completeAssetDic.Add(addressName, ResourceCreator.loadedFiles[addressName]);
+                    __instance.completeAssetDic.Add(addressName, UnityEngine.Object.Instantiate(ResourceCreator.loadedFiles[addressName]));
                     //__result = true;
                     return true;
                 }
