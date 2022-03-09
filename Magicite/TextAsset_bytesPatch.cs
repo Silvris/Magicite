@@ -16,7 +16,7 @@ namespace Magicite
     {
         public static void Postfix(ref Il2CppStructArray<byte> __result)
         {
-            //EntryPoint.Instance.Log.LogInfo("TextAsset.bytes.getter");
+            //EntryPoint.Logger.LogInfo("TextAsset.bytes.getter");
             if(__result[0] == 'M')
             {
                 if(__result[2] == 'G')//these two ifs make it so only MAGI files get pushed into the more intensive checks

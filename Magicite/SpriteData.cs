@@ -16,12 +16,44 @@ namespace Magicite
         public bool hasBorder = false;
         public bool hasPPU = false;
         public bool hasWrap = false;
+        public bool hasTO = false;
         public string name = "";
         public Rect rect;
         public Vector2 pivot;
         public Vector4 border;
         public Single pixelsPerUnit;
         public TextureWrapMode wrapMode;
+        public string textureOverride = "";
+
+        public static bool ExportFromSprite(Sprite spr, string fullPath, bool useTextureRect = false, string textureOverride = "")
+        {
+            try
+            {
+                string sprData = "";
+                if (textureOverride != "")
+                {
+                    sprData += $"TextureOverride = {textureOverride}";
+                }
+                if (spr.packed||useTextureRect)
+                {
+                    Rect textureRect = spr.GetTextureRect();
+                    sprData += $"Rect = [{textureRect.x},{textureRect.y},{textureRect.width},{textureRect.height}]\n";
+                }
+                else sprData += $"Rect = [{spr.rect.x},{spr.rect.y},{spr.rect.width},{spr.rect.height}]\n";
+                sprData += $"Pivot = [{spr.pivot.x / spr.texture.width},{spr.pivot.y / spr.texture.height}]\n";
+                sprData += $"PixelsPerUnit = {spr.pixelsPerUnit}\n";
+                sprData += $"Border = [{spr.border.x},{spr.border.y},{spr.border.z},{spr.border.w}]\n";
+                sprData += $"WrapMode = {Enum.GetName(typeof(TextureWrapMode), spr.texture.wrapMode)}";
+                File.WriteAllText(fullPath, sprData);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                EntryPoint.Logger.LogInfo($"Error occured while exporting sprite {spr.name}: {ex}");
+                return false;
+            }
+
+        }
 
         public SpriteData(string[] strings, string Name)
         {
@@ -30,21 +62,22 @@ namespace Magicite
             pivot = new Vector2();
             border = new Vector4();
             wrapMode = TextureWrapMode.Clamp;
+            textureOverride = "";
 
             foreach(string datatype in strings)
             {
                 
                 List<string> kvp = new List<string>(datatype.Split('='));
-                foreach(string v in kvp)
+                for(int i = 0; i < kvp.Count;i++)
                 {
-                    v.Trim();
+                   kvp[i] = kvp[i].Trim().Replace(" ", "").Replace("\t","");
                 }
                 if(kvp.Count != 2)
                 {
-                    EntryPoint.Instance.Log.LogWarning($"SpriteData [{name}]: Invalid entry (unable to distinguish key)");
+                    EntryPoint.Logger.LogWarning($"SpriteData [{name}]: Invalid entry (unable to distinguish key)");
                     return;
                 }
-                //EntryPoint.Instance.Log.LogInfo(kvp[0].ToLower());
+                //EntryPoint.Logger.LogInfo(kvp[0].ToLower());
                 switch (kvp[0].ToLower())
                 {
                     case "rect":
@@ -62,8 +95,11 @@ namespace Magicite
                     case "wrapmode":
                         SetWrap(kvp[1]);
                         break;
+                    case "textureoverride":
+                        SetTextureOverride(kvp[1]);
+                        break;
                     default:
-                        EntryPoint.Instance.Log.LogWarning($"SpriteData [{name}]: Unknown key \"{kvp[0]}\"");
+                        EntryPoint.Logger.LogWarning($"SpriteData [{name}]: Unknown key \"{kvp[0]}\"");
                         break;
 
                 }
@@ -75,7 +111,7 @@ namespace Magicite
             string[] vals = input.Replace("[","").Replace("]","").Split(',');
             if(vals.Length != 4)
             {
-                EntryPoint.Instance.Log.LogWarning($"SpriteData [{name}]: Invalid rect length. Expected 4, got {vals.Length}.");
+                EntryPoint.Logger.LogWarning($"SpriteData [{name}]: Invalid rect length. Expected 4, got {vals.Length}.");
                 return;
             }
             rect.x = Convert.ToSingle(vals[0]);
@@ -90,7 +126,7 @@ namespace Magicite
             string[] vals = input.Replace("[", "").Replace("]", "").Split(',');
             if (vals.Length != 2)
             {
-                EntryPoint.Instance.Log.LogInfo($"SpriteData [{name}]: Invalid pivot length. Expected 2, got {vals.Length}.");
+                EntryPoint.Logger.LogInfo($"SpriteData [{name}]: Invalid pivot length. Expected 2, got {vals.Length}.");
                 return;
             }
             pivot.x = Convert.ToSingle(vals[0]);
@@ -103,7 +139,7 @@ namespace Magicite
             string[] vals = input.Replace("[", "").Replace("]", "").Split(',');
             if (vals.Length != 4)
             {
-                EntryPoint.Instance.Log.LogInfo($"SpriteData [{name}]: Invalid border length. Expected 4, got {vals.Length}.");
+                EntryPoint.Logger.LogInfo($"SpriteData [{name}]: Invalid border length. Expected 4, got {vals.Length}.");
                 return;
             }
             border.x = Convert.ToSingle(vals[0]);
@@ -117,6 +153,11 @@ namespace Magicite
         {
             pixelsPerUnit = Convert.ToSingle(input);
             hasPPU = true;
+        }
+        public void SetTextureOverride(string path)
+        {
+            textureOverride = path;
+            hasTO = true;
         }
         public void SetWrap(string input)
         {
@@ -139,7 +180,7 @@ namespace Magicite
                     hasWrap = true;
                     break;
                 default:
-                    EntryPoint.Instance.Log.LogInfo($"SpriteData [{name}]: Invalid wrap mode: {input}.");
+                    EntryPoint.Logger.LogInfo($"SpriteData [{name}]: Invalid wrap mode: {input}.");
                     break;
             }
         }

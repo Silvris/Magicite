@@ -66,16 +66,21 @@ namespace Magicite
                 string path = basePath + "/" + name;
                 string key = path.Replace(EntryPoint.Configuration.ImportDirectory, "");
                 Sprite data;
-                if (ResourceCreator.loadedFiles.ContainsKey(key))
+                if(name != "")
                 {
-                    data = ResourceCreator.loadedFiles[key].Cast<Sprite>();
+                    if (ResourceCreator.loadedFiles.ContainsKey(key))
+                    {
+                        data = ResourceCreator.loadedFiles[key].Cast<Sprite>();
+                    }
+                    else
+                    {
+                        SpriteData sd = new SpriteData(File.ReadAllLines(path + ".spritedata"), name);
+                        data = CreateSprite(ReadTextureFromFile(path + ".png", name), sd);
+                        ResourceCreator.loadedFiles.Add(key, data);
+                    }
+                    sds.Add(line, data);
                 }
-                else
-                {
-                    data = CreateSprite(ReadTextureFromFile(path + ".png", name), new SpriteData(File.ReadAllLines(path + ".spritedata"), name));
-                    ResourceCreator.loadedFiles.Add(key, data);
-                }
-                sds.Add(line,data);
+
             }
             return sds;
         }
@@ -86,7 +91,7 @@ namespace Magicite
             SpriteAtlas atlas = UnityEngine.Object.Instantiate(DonorAssets["SpriteAtlas"]).Cast<SpriteAtlas>();
             //I'm really hoping this doesn't grab the same asset twice
             atlas.name = name;
-            //EntryPoint.Instance.Log.LogInfo(atlas.name);
+            //EntryPoint.Logger.LogInfo(atlas.name);
             //now generate the needed information for our Atlas functions to run
             AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Path.GetDirectoryName(fullPath)));
             AtlasManager.Atlases.Add(ad);
@@ -100,4 +105,86 @@ namespace Magicite
             return text;
         }
     }
+
+    public static class TextureWriting
+    {
+        public static Texture2D GetFragment(Texture2D texture, Int32 x, Int32 y, Int32 width, Int32 height)
+        {
+            if (texture == null)
+                return null;
+
+            Texture2D result = new Texture2D(width, height, texture.format, false);
+            Color[] colors = texture.GetPixels(x, y, width, height);
+            result.SetPixels(colors);
+            result.Apply();
+            return result;
+        }
+
+        public static Texture2D CopyAsReadable(Texture texture)
+        {
+            if (texture == null)
+                return null;
+
+            RenderTexture oldTarget = Camera.main.targetTexture;
+            RenderTexture oldActive = RenderTexture.active;
+
+            Texture2D result = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false);
+
+            RenderTexture rt = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32);
+            try
+            {
+                Camera.main.targetTexture = rt;
+                //Camera.main.Render();
+                Graphics.Blit(texture, rt);
+
+                RenderTexture.active = rt;
+                result.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
+            }
+            finally
+            {
+                RenderTexture.active = oldActive;
+                Camera.main.targetTexture = oldTarget;
+                RenderTexture.ReleaseTemporary(rt);
+            }
+
+            return result;
+        }
+
+        public static void WriteTextureToFile(Texture2D texture, String outputPath)
+        {
+            Byte[] data;
+            String extension = Path.GetExtension(outputPath);
+            switch (extension)
+            {
+                case ".png":
+                    data = ImageConversion.EncodeToPNG(texture);
+                    break;
+                case ".jpg":
+                    data = ImageConversion.EncodeToJPG(texture);
+                    break;
+                case ".tga":
+                    data = ImageConversion.EncodeToTGA(texture);
+                    break;
+                default:
+                    throw new NotSupportedException($"Not supported type [{extension}] of texture [{texture.name}]. Path: [{outputPath}]");
+            }
+
+            File.WriteAllBytes(outputPath, data);
+        }
+
+        public static void ExportTexture(Texture2D asset, String fullPath)
+        {
+            if (asset.isReadable)
+            {
+                WriteTextureToFile(asset, fullPath);
+            }
+            else
+            {
+                Texture2D readable = CopyAsReadable(asset);
+                WriteTextureToFile(readable, fullPath);
+                UnityEngine.Object.Destroy(readable);
+            }
+        }
+    }
+
 }

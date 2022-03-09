@@ -19,7 +19,19 @@ namespace Magicite
             keys = new List<string>();
             values = new List<string>();
         }
-
+        public JsonDict(Il2CppSystem.Collections.Generic.Dictionary<string,string> dict)
+        {
+            keys = new List<string>();
+            values = new List<string>();
+            foreach (string key in dict.Keys)
+            {
+                keys.Add(key);
+            }
+            foreach (string value in dict.Values)
+            {
+                values.Add(value);
+            }
+        }
         public void MergeDict(JsonDict donor)
         {
             foreach(string key in donor.keys)
@@ -47,13 +59,29 @@ namespace Magicite
                     baseFile.MergeDict(obj);
                 }
             }
-            //EntryPoint.Instance.Log.LogInfo(group);
+            //EntryPoint.Logger.LogInfo(group);
             return baseFile;
         }
-
-        public static string ToJson(JsonDict obj)
+        public static void CheckForMissingFiles(ref JsonDict dict, string path)
         {
-            string rtn = JsonSerializer.Serialize(obj); ;
+            foreach(string value in dict.values)
+            {
+
+            }
+        }
+        public static string ToJson(JsonDict obj,bool prettyPrint = false)
+        {
+            string rtn = "";
+            if (prettyPrint)
+            {
+                JsonSerializerOptions opt = new JsonSerializerOptions() { WriteIndented = true};
+                rtn = JsonSerializer.Serialize(obj,opt);
+            }
+            else
+            {
+                rtn = JsonSerializer.Serialize(obj);
+            }
+
             return rtn;
         }
     }

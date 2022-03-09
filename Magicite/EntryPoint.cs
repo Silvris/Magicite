@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.IL2CPP;
+using BepInEx.Logging;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnhollowerRuntimeLib;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.U2D;
 
 namespace Magicite
@@ -25,6 +27,8 @@ namespace Magicite
     {
         public static EntryPoint Instance { get; private set; }
         public static Configuration Configuration { get; private set; }
+        public static ManualLogSource Logger { get; set; }
+        public static AsyncOperationHandle LastHandle { get; set; }
         public override void Load()
         {
             try
@@ -32,14 +36,22 @@ namespace Magicite
 
                 Instance = this;
                 Configuration = new Configuration();
+                Logger = this.Log;
                 Log.LogInfo("Loading...");
                 ClassInjector.RegisterTypeInIl2Cpp<ResourceCreator>(); //todo: make a more efficient method of injecting here (or move to BepInEx that auto-injects)
+                ClassInjector.RegisterTypeInIl2Cpp<ResourceExporter>();
                 String name = typeof(ResourceCreator).FullName;
                 Log.LogInfo($"Initializing in-game singleton: {name}");
                 GameObject singleton = new GameObject(name);
                 singleton.hideFlags = HideFlags.HideAndDontSave;
                 GameObject.DontDestroyOnLoad(singleton);
-                Log.LogInfo("Adding ModComponent to singleton...");
+                Log.LogInfo("Adding ResourceCreator to singleton...");
+                ResourceExporter exporter = singleton.AddComponent<ResourceExporter>();
+                if (exporter is null)
+                {
+                    GameObject.Destroy(singleton);
+                    throw new Exception($"The object is missing the required component: {name}");
+                }
                 ResourceCreator component = singleton.AddComponent<ResourceCreator>();
                 if (component is null)
                 {
