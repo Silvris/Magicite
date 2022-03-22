@@ -32,7 +32,7 @@ namespace Magicite
                 string sprData = "";
                 if (textureOverride != "")
                 {
-                    sprData += $"TextureOverride = {textureOverride}";
+                    sprData += $"TextureOverride = {textureOverride}\n";
                 }
                 if (spr.packed||useTextureRect)
                 {
@@ -40,7 +40,7 @@ namespace Magicite
                     sprData += $"Rect = [{textureRect.x},{textureRect.y},{textureRect.width},{textureRect.height}]\n";
                 }
                 else sprData += $"Rect = [{spr.rect.x},{spr.rect.y},{spr.rect.width},{spr.rect.height}]\n";
-                sprData += $"Pivot = [{spr.pivot.x / spr.texture.width},{spr.pivot.y / spr.texture.height}]\n";
+                sprData += $"Pivot = [{spr.pivot.x / spr.rect.width},{spr.pivot.y / spr.rect.height}]\n";
                 sprData += $"PixelsPerUnit = {spr.pixelsPerUnit}\n";
                 sprData += $"Border = [{spr.border.x},{spr.border.y},{spr.border.z},{spr.border.w}]\n";
                 sprData += $"WrapMode = {Enum.GetName(typeof(TextureWrapMode), spr.texture.wrapMode)}";

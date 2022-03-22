@@ -12,6 +12,7 @@ using Il2CppSystem.Asset;
 using Il2CppSystem.Threading;
 using BepInEx.IL2CPP.Utils.Collections;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace Magicite
 {
@@ -71,7 +72,7 @@ namespace Magicite
 
                     if (ImportDirectory != String.Empty || ImportDirectory != null)
                     {
-                        StartCoroutine(AddFiles().WrapToIl2Cpp());
+                        AddFiles();
                         isDisabled = true;
                     }
                     else
@@ -85,6 +86,7 @@ namespace Magicite
         }
         public static UnityEngine.Object LoadAsset(string fullPath, string ext)
         {
+            fullPath = fullPath.Replace("\\", "/");
             switch (ext)
             {
                 case ".csv":
@@ -107,23 +109,26 @@ namespace Magicite
                         return tex;
                     }
                 case ".spritedata":
+
                     //spritedata likely with texture override, allowing for sprite sheet use
                     SpriteData sa = new SpriteData(File.ReadAllLines(fullPath), Path.GetFileNameWithoutExtension(fullPath));
                     if (sa.hasTO)
                     {
                         //spritedata defines texture to use
-                        Texture2D texOver = ResourceGeneration.ReadTextureFromFile(fullPath.Replace("Assets*", "") + sa.textureOverride, Path.GetFileNameWithoutExtension(sa.textureOverride));
+                        Texture2D texOver = ResourceGeneration.ReadTextureFromFile(Path.Combine(Regex.Replace(fullPath, "/Assets/GameAssets/.*$", ""),sa.textureOverride) + ".png", Path.GetFileNameWithoutExtension(sa.textureOverride));
                         Sprite spr = ResourceGeneration.CreateSprite(texOver, sa);
+                        spr.hideFlags = HideFlags.HideAndDontSave;
                         return spr;
                     }
                     else
                     {
                         Texture2D defTex = new Texture2D(1, 1);
                         Sprite spr = ResourceGeneration.CreateSprite(defTex, sa);
+                        spr.hideFlags = HideFlags.HideAndDontSave;
                         return spr;
                     }
                 case ".atlas":
-                    //EntryPoint.Logger.LogInfo(fullPath);
+                    //EntryPoint.Logger.LogInfo($"fullPath:{fullPath}, regex:{Regex.Replace(fullPath, "/Assets/GameAssets/.*$", "")}");
                     return ResourceGeneration.CreateSpriteAtlas(Path.GetFileNameWithoutExtension(fullPath), fullPath);
                 case ".bytes":
                     TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(fullPath);
@@ -191,17 +196,18 @@ namespace Magicite
                 //kinda assuming it'll return null if the data is wrong
                 foreach (KeyValuePair<string, Dictionary<string, string>> group in OurFiles)
                 {
+                    //EntryPoint.Logger.LogInfo(group.Key);
                     List<KeyValuePair<string, string>> removes = new List<KeyValuePair<string, string>>();
                     foreach (KeyValuePair<string, string> kvp in group.Value)
                     {
-
+                        //EntryPoint.Logger.LogInfo(kvp.Key);
                         if (!loadedFiles.ContainsKey(kvp.value)) //this allows us to register sprites loaded by atlas generation, and then ignore them here
                         {
                             //EntryPoint.Logger.LogInfo(group.key);
                             //EntryPoint.Logger.LogInfo(kvp.value);
                             //adding a directory check here, just to further prevent failure
                             //especially while GameObjects cannot be added yet
-                            EntryPoint.Logger.LogInfo(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value)));
+                            //EntryPoint.Logger.LogInfo(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value)));
                             if (Directory.Exists(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value))))
                             {
                                 var fileGrab = Directory.GetFiles(ImportDirectory + $"\\{group.key}", $"{kvp.value}.*");
@@ -282,12 +288,11 @@ namespace Magicite
             }
         
     }
-        public IEnumerator AddFiles()
+        public void AddFiles()
         {
-            Task.Run((Action)GenOurFiles);
-            FillOurFiles(); //testing to see if it wouldn't be more efficient to just jit file generation
+            GenOurFiles();
+            FillOurFiles();//testing to see if it wouldn't be more efficient to just jit file generation
             //could potentially set it as a mode for "fast but inefficient" vs "slow but memory efficient"
-            yield return null;
         }
 
     }

@@ -46,7 +46,7 @@ namespace Magicite
                         string sprBase = Path.GetDirectoryName(group[sprName]);
                         string texPath = sprBase + "/" + spr.texture.name;
                         string dataPath = sprBase + "/" + spr.name.Replace("(Clone)", "");
-                        outData += $"{sprName};{texPath};{dataPath}";
+                        outData += $"{sprName};{dataPath}\n";
                         if (!textures.Contains(spr.texture))
                         {
                             TextureWriting.ExportTexture(spr.texture, Path.Combine(ExportDirectory,texPath + ".png"));

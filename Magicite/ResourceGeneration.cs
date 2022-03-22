@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -62,23 +63,35 @@ namespace Magicite
             Dictionary<string, Sprite> sds = new Dictionary<string, Sprite>();
             foreach(string line in lines)
             {
-                string name = line.Replace("\n", "").Replace("\r", "");
-                string path = basePath + "/" + name;
+                string[] data = line.Split(';');
+                if (!(data.Length > 1)) throw new FormatException("SpriteAtlas Entry must have name and path separated by \";\"");
+                string name = data[0].Replace("\n", "").Replace("\r", "");
+                string path = basePath + "/" + data[1];
                 string key = path.Replace(EntryPoint.Configuration.ImportDirectory, "");
-                Sprite data;
+                Sprite spr = null;
                 if(name != "")
                 {
                     if (ResourceCreator.loadedFiles.ContainsKey(key))
                     {
-                        data = ResourceCreator.loadedFiles[key].Cast<Sprite>();
+                        spr = ResourceCreator.loadedFiles[key].Cast<Sprite>();
                     }
                     else
                     {
                         SpriteData sd = new SpriteData(File.ReadAllLines(path + ".spritedata"), name);
-                        data = CreateSprite(ReadTextureFromFile(path + ".png", name), sd);
-                        ResourceCreator.loadedFiles.Add(key, data);
+                        Texture2D tex;
+                        if (sd.hasTO)
+                        {
+                            EntryPoint.Logger.LogInfo(basePath + "/" + sd.textureOverride + ".png");
+                            tex = ReadTextureFromFile(Path.Combine(basePath,sd.textureOverride) + ".png", Path.GetFileName(sd.textureOverride));
+                        }
+                        else
+                        {
+                            tex = ReadTextureFromFile(path + ".png", name);
+                        }
+                        spr = CreateSprite(tex, sd);
+                        ResourceCreator.loadedFiles.Add(key, spr);
                     }
-                    sds.Add(line, data);
+                    sds.Add(name, spr);
                 }
 
             }
@@ -93,7 +106,7 @@ namespace Magicite
             atlas.name = name;
             //EntryPoint.Logger.LogInfo(atlas.name);
             //now generate the needed information for our Atlas functions to run
-            AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Path.GetDirectoryName(fullPath)));
+            AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Regex.Replace(fullPath, "/Assets/GameAssets/.*$", "")));
             AtlasManager.Atlases.Add(ad);
             atlas.hideFlags = HideFlags.HideAndDontSave;
             return atlas;
@@ -108,6 +121,7 @@ namespace Magicite
 
     public static class TextureWriting
     {
+        //thanks to Albeoris for these
         public static Texture2D GetFragment(Texture2D texture, Int32 x, Int32 y, Int32 width, Int32 height)
         {
             if (texture == null)

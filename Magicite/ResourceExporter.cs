@@ -299,6 +299,7 @@ namespace Magicite
             }
         }
 
+        //TODO: Replace this with Catalog hooks
         public String GetFileExtension(String assetAddress)
         {
             string _catalogJson = File.ReadAllText(Application.streamingAssetsPath + @"/aa/catalog.json");

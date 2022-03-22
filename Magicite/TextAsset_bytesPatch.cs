@@ -16,23 +16,25 @@ namespace Magicite
     {
         public static void Postfix(ref Il2CppStructArray<byte> __result)
         {
-            //EntryPoint.Logger.LogInfo("TextAsset.bytes.getter");
-            if(__result[0] == 'M')
+            if(__result.Length > 0)
             {
-                if(__result[2] == 'G')//these two ifs make it so only MAGI files get pushed into the more intensive checks
+                //EntryPoint.Logger.LogInfo("TextAsset.bytes.getter");
+                if (__result[0] == 'M')
                 {
-                    if (__result.Length > 4)
+                    if (__result[2] == 'G')//these two ifs make it so only MAGI files get pushed into the more intensive checks
                     {
-                        string data = Encoding.UTF8.GetString(__result);
-                        if (data.StartsWith("MAGI"))
+                        if (__result.Length > 4)
                         {
-                            string path = data.Replace("MAGI", "");
-                            __result = File.ReadAllBytes(path);
+                            string data = Encoding.UTF8.GetString(__result);
+                            if (data.StartsWith("MAGI"))
+                            {
+                                string path = data.Replace("MAGI", "");
+                                __result = File.ReadAllBytes(path);
+                            }
                         }
                     }
                 }
             }
-
         }
     }
 }
