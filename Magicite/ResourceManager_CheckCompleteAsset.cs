@@ -16,11 +16,11 @@ namespace Magicite
         public static List<int> knownAssets = new List<int>();
         public static bool Prefix(string addressName, ResourceManager __instance, ref bool __result)
         {
-            //EntryPoint.Logger.LogInfo($"CheckCompleteAsset:{addressName}");
+            EntryPoint.Logger.LogInfo($"CheckCompleteAsset:{addressName}");
             if (ResourceCreator.OurFilePaths.ContainsKey(addressName))
             {
                 string filePath = ResourceCreator.OurFilePaths[addressName];
-                //EntryPoint.Logger.LogInfo($"filePath:{filePath}");
+                EntryPoint.Logger.LogInfo($"filePath:{filePath}");
                 if (__instance.completeAssetDic.ContainsKey(addressName))
                 {
                     if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID())){
