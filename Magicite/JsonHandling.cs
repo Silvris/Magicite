@@ -32,6 +32,17 @@ namespace Magicite
                 values.Add(value);
             }
         }
+        public string GetValue(string key)
+        {
+            for(int i = 0; i < keys.Count; i++)
+            {
+                if(keys[i] == key)
+                {
+                    return values[i];
+                }
+            }
+            return "";
+        }
         public void MergeDict(JsonDict donor)
         {
             foreach(string key in donor.keys)

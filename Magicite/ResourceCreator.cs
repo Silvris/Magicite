@@ -84,7 +84,7 @@ namespace Magicite
             }
 
         }
-        public static UnityEngine.Object LoadAsset(string fullPath, string ext)
+        public static UnityEngine.Object LoadAsset(string fullPath, string ext, Il2CppSystem.Object originalAsset)
         {
             fullPath = fullPath.Replace("\\", "/");
             switch (ext)
@@ -242,7 +242,7 @@ namespace Magicite
                                         //EntryPoint.Logger.LogInfo(asset);
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
-                                            UnityEngine.Object asset = LoadAsset(file, ext);
+                                            UnityEngine.Object asset = LoadAsset(file, ext,resourceManager.completeAssetDic[kvp.value]);
                                             if(asset != null)
                                             {
                                                 resourceManager.completeAssetDic[kvp.value] = asset;

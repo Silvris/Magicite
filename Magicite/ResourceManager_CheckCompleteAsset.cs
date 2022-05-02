@@ -14,7 +14,7 @@ namespace Magicite
     public static class ResourceManager_CheckCompleteAsset
     {
         public static List<int> knownAssets = new List<int>();
-        public static bool Prefix(string addressName, ResourceManager __instance, ref bool __result)
+        public static void Postfix(string addressName, ResourceManager __instance, ref bool __result)
         {
             EntryPoint.Logger.LogInfo($"CheckCompleteAsset:{addressName}");
             if (ResourceCreator.OurFilePaths.ContainsKey(addressName))
@@ -24,15 +24,17 @@ namespace Magicite
                 if (__instance.completeAssetDic.ContainsKey(addressName))
                 {
                     if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID())){
-                        __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath));
+                        __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath),__instance.completeAssetDic[addressName]);
+                        if (__result == false) __result = true;
                     }
                 }
                 else
                 {
-                    __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath)));
+                    __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath),null));
+                    if (__result == false) __result = true;
                 }
             }
-            return true;//there is never a reason to return false here
+            //there is never a reason to return false here
             /*keeping in case I take the mode route
             //EntryPoint.Logger.LogInfo("ResourceManager.CheckCompleteAsset");
             if (ResourceCreator.loadedFiles.ContainsKey(addressName))
