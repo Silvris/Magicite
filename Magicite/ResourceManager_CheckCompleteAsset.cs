@@ -9,30 +9,38 @@ using System.Threading.Tasks;
 
 namespace Magicite
 {
-    [HarmonyPatch(typeof(ResourceManager),nameof(ResourceManager.CheckCompleteAsset))]
+    [HarmonyPatch(typeof(ResourceManager), nameof(ResourceManager.CheckCompleteAsset))]
     [HarmonyAfter("Memoria.FFPR")]//always run after Memoria's
     public static class ResourceManager_CheckCompleteAsset
     {
         public static List<int> knownAssets = new List<int>();
         public static void Postfix(string addressName, ResourceManager __instance, ref bool __result)
         {
-            EntryPoint.Logger.LogInfo($"CheckCompleteAsset:{addressName}");
+            //EntryPoint.Logger.LogInfo($"CheckCompleteAsset:{addressName}");
+            //EntryPoint.Logger.LogInfo($"Result:{__result}");
             if (ResourceCreator.OurFilePaths.ContainsKey(addressName))
             {
                 string filePath = ResourceCreator.OurFilePaths[addressName];
-                EntryPoint.Logger.LogInfo($"filePath:{filePath}");
-                if (__instance.completeAssetDic.ContainsKey(addressName))
+                string ext = Path.GetExtension(filePath);
+                bool isPartial = (ext == ".csv" || ext == ".txt");
+                if (!isPartial)
                 {
-                    if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID())){
-                        __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath),__instance.completeAssetDic[addressName]);
+                    //EntryPoint.Logger.LogInfo($"filePath:{filePath}");
+                    if (__instance.completeAssetDic.ContainsKey(addressName))
+                    {
+                        if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID()))
+                        {
+                            __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath), __instance.completeAssetDic[addressName]);
+                            if (__result == false) __result = true;
+                        }
+                    }
+                    else
+                    {
+                        __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath), null));
                         if (__result == false) __result = true;
                     }
                 }
-                else
-                {
-                    __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath),null));
-                    if (__result == false) __result = true;
-                }
+
             }
             //there is never a reason to return false here
             /*keeping in case I take the mode route

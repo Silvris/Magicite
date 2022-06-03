@@ -16,7 +16,7 @@ using UnityEngine.U2D;
 
 namespace Magicite
 {
-    [BepInPlugin("silvris.magicite", "Magicite Loader", "1.0.0.0")]
+    [BepInPlugin("silvris.magicite", "Magicite Loader", "2.0.0.0")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
     [BepInProcess("FINAL FANTASY III.exe")]
@@ -62,6 +62,7 @@ namespace Magicite
                 AssetBundle reqs = AssetBundle.LoadFromFile(Path.GetDirectoryName(self.Location) + "/Magicite.bundle");
                 ResourceGeneration.DonorAssets = new Dictionary<string, UnityEngine.Object>();
                 ResourceGeneration.DonorAssets.Add("SpriteAtlas", reqs.LoadAsset<SpriteAtlas>("Magicite/DonorAtlas.spriteatlas"));
+                ResourceGeneration.DonorAssets["SpriteAtlas"].hideFlags = HideFlags.HideAndDontSave;
                 reqs.Unload(false);
                 PatchMethods();
             }

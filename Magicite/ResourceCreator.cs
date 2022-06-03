@@ -24,6 +24,8 @@ namespace Magicite
         public static Dictionary<String, Dictionary<String, String>> OurFiles { get; set; }
         public static Dictionary<String, UnityEngine.Object> loadedFiles { get; set; }
         public static Dictionary<String,String> OurFilePaths { get; set; }
+        public static System.Collections.Generic.Dictionary<String,PartialAsset> PartialAssets { get; set; }
+        public static System.Collections.Generic.Dictionary<String, PartialAsset> OutputPartials { get; set; }
         private bool isDisabled = false;
         public ResourceCreator(IntPtr ptr) : base(ptr)
         {
@@ -40,6 +42,8 @@ namespace Magicite
                 OurFilePaths = new Dictionary<string, string>();
                 ImportDirectory = EntryPoint.Configuration.ImportDirectory;
                 loadedFiles = new Dictionary<string, UnityEngine.Object>();
+                PartialAssets = new System.Collections.Generic.Dictionary<string, PartialAsset>();
+                OutputPartials = new System.Collections.Generic.Dictionary<string, PartialAsset>();
                 if (EntryPoint.Configuration.ExportEnabled)
                 {
                     isDisabled = true;
@@ -87,21 +91,89 @@ namespace Magicite
         public static UnityEngine.Object LoadAsset(string fullPath, string ext, Il2CppSystem.Object originalAsset)
         {
             fullPath = fullPath.Replace("\\", "/");
+            //EntryPoint.Logger.LogInfo(fullPath);
+            //EntryPoint.Logger.LogInfo(ext);
+            //EntryPoint.Logger.LogInfo(originalAsset == null);
             switch (ext)
             {
                 case ".csv":
+                    if (fullPath == "PartialAsset.csv" && originalAsset != null)
+                    {
+                        TextAsset text = originalAsset.Cast<TextAsset>();
+                        if (PartialAssets.ContainsKey(text.name))
+                        {
+                            CSVData partialData = (CSVData)PartialAssets[text.name];
+                            CSVData baseData = new CSVData(text.name, text);
+                            baseData.MergeAsset(partialData);
+                            TextAsset t = baseData.ToAsset();
+                            //EntryPoint.Logger.LogInfo(t.text);
+                            if (!OutputPartials.ContainsKey(text.name)) OutputPartials.Add(text.name,baseData);
+                            //if (!loadedFiles.ContainsKey(text.name)) loadedFiles.Add(text.name, t);
+                            return t;
+                        }
+                        else
+                        {
+                            //can't partial, attempt to load a full path
+                            //note, this *will* throw an exception, but it'll definitely make you aware that it is a problem
+                            TextAsset ntext = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
+                            ntext.name = Path.GetFileNameWithoutExtension(fullPath);
+                            return ntext;
+                        }
+                    }
+                    else
+                    {
+                        //can't partial, attempt to load a full path
+                        TextAsset text = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
+                        text.name = Path.GetFileNameWithoutExtension(fullPath);
+                        return text;
+                    }
                 case ".txt":
+                    EntryPoint.Logger.LogInfo(originalAsset == null);
+                    if(fullPath == "PartialAsset.txt" && originalAsset != null)
+                    {
+                        TextAsset text = originalAsset.Cast<TextAsset>();
+                        if (PartialAssets.ContainsKey(text.name))
+                        {
+                            TXTData partialData = (TXTData)PartialAssets[text.name];
+                            TXTData baseData = new TXTData(text.name, text);
+                            baseData.MergeAsset(partialData);
+                            TextAsset t = baseData.ToAsset();
+                            //EntryPoint.Logger.LogInfo(t.text);
+                            if(!OutputPartials.ContainsKey(text.name))OutputPartials.Add(text.name,baseData);
+                            t.hideFlags = HideFlags.HideAndDontSave;
+                            return t;
+                        }
+                        else
+                        {
+                            //can't partial, attempt to load a full path
+                            TextAsset ntext = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
+                            ntext.name = Path.GetFileNameWithoutExtension(fullPath);
+                            ntext.hideFlags = HideFlags.HideAndDontSave;
+                            return ntext;
+                        }
+                    }
+                    else
+                    {
+                        //can't partial, attempt to load a full path
+                        TextAsset text = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
+                        text.name = Path.GetFileNameWithoutExtension(fullPath);
+                        text.hideFlags = HideFlags.HideAndDontSave;
+                        return text;
+                    }
                 case ".json":
                     TextAsset asset = ResourceGeneration.CreateTextAsset(File.ReadAllText(fullPath));
                     asset.name = Path.GetFileNameWithoutExtension(fullPath);
+                    asset.hideFlags = HideFlags.HideAndDontSave;
                     return asset;
                 case ".png":
                     //check for .spriteData, with we define asset as Sprite, without we just load T2D itself
                     Texture2D tex = ResourceGeneration.ReadTextureFromFile(fullPath, Path.GetFileNameWithoutExtension(fullPath));
+                    tex.hideFlags = HideFlags.HideAndDontSave;
                     if (File.Exists(Path.ChangeExtension(fullPath, ".spriteData")))
                     {
                         SpriteData sd = new SpriteData(File.ReadAllLines(Path.ChangeExtension(fullPath, ".spriteData")), Path.GetFileNameWithoutExtension(fullPath));
                         Sprite spr = ResourceGeneration.CreateSprite(tex, sd);
+                        spr.hideFlags = HideFlags.HideAndDontSave;
                         return spr;
                     }
                     else
@@ -133,8 +205,10 @@ namespace Magicite
                 case ".bytes":
                     TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(fullPath);
                     binary.name = Path.GetFileNameWithoutExtension(fullPath);
+                    binary.hideFlags = HideFlags.HideAndDontSave;
                     return binary;
                 default:
+                    EntryPoint.Logger.LogError($"Failed to load asset of type: {ext}");
                     return null;
             }
         }
@@ -156,13 +230,15 @@ namespace Magicite
         }
         public void GenOurFiles()
         {
+            List<string> mods = new List<string>();
+            JsonDict baseAssetsPathData = new JsonDict();
             List<string> groups = new List<string>();
             try
             {
-                System.Collections.Generic.List<string> group = Directory.GetDirectories(ImportDirectory).ToList();
-                foreach (string g in group)
+                System.Collections.Generic.List<string> mod = Directory.GetDirectories(ImportDirectory).ToList();
+                foreach (string m in mod)
                 {
-                    groups.Add(g);
+                    mods.Add(m);
                 }
             }
             catch (Exception ex)
@@ -170,22 +246,39 @@ namespace Magicite
                 EntryPoint.Logger.LogError($"[ResourceCreator.AddFiles]: {ex}");
                 return;
             }
-            JsonDict assetsPathData = new JsonDict();
-            foreach (String group in groups)
+            foreach(string mod in mods)
             {
-                //ModComponent.Log.LogInfo(group + "/keys.json");
-                /*
-                if(File.Exists(group + "/keys.json"))
+                try
                 {
-                    keys.Add(File.ReadAllText(group + "/keys.json"));
-                }*/
-                if (Directory.Exists(group + "/keys"))
-                {
-                    assetsPathData.keys.Add(Path.GetFileName(group));
-                    assetsPathData.values.Add(JsonHandling.ToJson(JsonHandling.MergeJsonDictsInPath(group + "/keys", Path.GetFileName(group))));
+                    System.Collections.Generic.List<string> group = Directory.GetDirectories(mod).ToList();
+                    foreach (string g in group)
+                    {
+                        groups.Add(g.ToLower());
+                    }
                 }
+                catch (Exception ex)
+                {
+                    EntryPoint.Logger.LogError($"[ResourceCreator.AddFiles]: {ex}");
+                    return;
+                }
+                JsonDict assetsPathData = new JsonDict();
+                foreach (String group in groups)
+                {
+                    //ModComponent.Log.LogInfo(group + "/keys.json");
+                    /*
+                    if(File.Exists(group + "/keys.json"))
+                    {
+                        keys.Add(File.ReadAllText(group + "/keys.json"));
+                    }*/
+                    if (Directory.Exists(group + "/keys"))
+                    {
+                        assetsPathData.keys.Add(Path.GetFileName(group));
+                        assetsPathData.values.Add(JsonHandling.ToJson(JsonHandling.MergeJsonDictsInPath(group + "/keys", Path.GetFileName(group))));
+                    }
+                }
+                baseAssetsPathData.MergeDict(assetsPathData);
             }
-            String assetsPathtxt = JsonHandling.ToJson(assetsPathData);
+            String assetsPathtxt = JsonHandling.ToJson(baseAssetsPathData);    
             //EntryPoint.Logger.LogInfo(assetsPathtxt);
             OurFiles = AssetPathUtilty.Parse(assetsPathtxt);
         }
@@ -207,44 +300,80 @@ namespace Magicite
                             //EntryPoint.Logger.LogInfo(kvp.value);
                             //adding a directory check here, just to further prevent failure
                             //especially while GameObjects cannot be added yet
+                            var directories = Directory.GetDirectories(ImportDirectory);
                             //EntryPoint.Logger.LogInfo(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value)));
-                            if (Directory.Exists(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value))))
+                            if (true)
                             {
-                                var fileGrab = Directory.GetFiles(ImportDirectory + $"\\{group.key}", $"{kvp.value}.*");
                                 List<string> files = new List<string>();
-                                foreach (string file in fileGrab)
+                                foreach(string dir in directories)
                                 {
-                                    if (ImportableFile(file))
+                                    if (Directory.Exists(Path.Combine(ImportDirectory, dir, group.key)))
                                     {
-                                        files.Add(file);
+                                        var fileGrab = Directory.GetFiles(Path.Combine(ImportDirectory, dir, group.key), $"{kvp.value}.*", SearchOption.AllDirectories);
+
+                                        foreach (string file in fileGrab)
+                                        {
+                                            if (ImportableFile(file))
+                                            {
+                                                files.Add(file);
+                                            }
+                                        }
                                     }
+
                                 }
                                 if (files.Count > 0)
                                 {
                                     //at least one file exists, we're gonna just use the first one as to force unique keys
                                     string file = files[0];
                                     string ext = Path.GetExtension(file);
-                                    if(ext == ".spritedata")
+                                    if (ext == ".spritedata")
                                     {
-                                        foreach(string fTest in files)
+                                        foreach (string fTest in files)
                                         {
-                                            if(Path.GetExtension(fTest) == ".png")
+                                            if (Path.GetExtension(fTest) == ".png")
                                             {
                                                 file = fTest;
                                                 ext = Path.GetExtension(fTest);
                                             }
                                         }
                                     }
+                                    //EntryPoint.Logger.LogInfo(file);
+                                    //EntryPoint.Logger.LogInfo(ext);
+                                    if (ext == ".csv"||ext == ".txt")
+                                    {
+                                        //partials
+                                        PartialAsset asset;
+                                        if (ext == ".csv") asset = new CSVData(Path.GetFileNameWithoutExtension(file));
+                                        else asset = new TXTData(Path.GetFileNameWithoutExtension(file));
+                                        foreach(string pfile in files)
+                                        {
+                                            asset.MergeData(new TextAsset(File.ReadAllText(pfile)));
+                                        }
+                                        string key = Path.GetFileNameWithoutExtension(file);
+                                        //EntryPoint.Logger.LogInfo(PartialAssets.ContainsKey(Path.GetFileNameWithoutExtension(file)));
+                                        if (PartialAssets.ContainsKey(Path.GetFileNameWithoutExtension(file)))
+                                        {
+
+                                            PartialAssets[Path.GetFileNameWithoutExtension(file)].MergeAsset(asset);
+                                        }
+                                        else 
+                                        { 
+
+                                            PartialAssets.Add(Path.GetFileNameWithoutExtension(file), asset);
+                                        }
+                                        file = "PartialAsset" + ext;
+                                    }
                                     if (ext != String.Empty)
                                     {
                                         OurFilePaths.Add(kvp.value,file);
                                         //EntryPoint.Logger.LogInfo(file);
-                                        //EntryPoint.Logger.LogInfo(asset);
+                                        
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
                                             UnityEngine.Object asset = LoadAsset(file, ext,resourceManager.completeAssetDic[kvp.value]);
                                             if(asset != null)
                                             {
+                                                //EntryPoint.Logger.LogInfo(asset);
                                                 resourceManager.completeAssetDic[kvp.value] = asset;
                                             }
                                         }

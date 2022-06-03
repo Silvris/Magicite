@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173770</GameRegistryPath>
+    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173820</GameRegistryPath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">bin\FF3</GamePath>
@@ -138,15 +138,20 @@
     <Compile Include="AsyncSpriteExport.cs" />
     <Compile Include="AtlasManager.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="CSVData.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="JsonHandling.cs" />
+    <Compile Include="Content_CreateMaster.cs" />
+    <Compile Include="PartialAsset.cs" />
     <Compile Include="ResourceCreator.cs" />
     <Compile Include="ResourceExporter.cs" />
     <Compile Include="ResourceGeneration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager_CheckCompleteAsset.cs" />
+    <Compile Include="ResourceManager_IsLoadAssetCompleted.cs" />
     <Compile Include="SpriteData.cs" />
     <Compile Include="TextAsset_bytesPatch.cs" />
+    <Compile Include="TXTData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
