@@ -23,7 +23,7 @@ namespace Magicite
         {
             ConfigFile file = EntryPoint.Instance.Config;
             _ImportDirectory = file.Bind(new ConfigDefinition("Magicite Paths", "Import Directory"), "%StreamingAssets%/Magicite", new ConfigDescription("The import directory for custom asset files.\n\n Available replacements:\n%StreamingAssets% - StreamingAssets folder\n%DataPath% - \"FINAL FANTASY_Data\" folder\n%PersistentData% - \"AppData/LocalLow/SQUARE ENIX, Inc_/FINAL FANTASY\""));
-            _ExportDirectory = file.Bind(new ConfigDefinition("Magicite Paths", "Export Directory"), "%StreamingAssets%/Magicite", new ConfigDescription("The export directory for extracting the game's files.\n\n Available replacements:\n%StreamingAssets% - StreamingAssets folder\n%DataPath% - \"FINAL FANTASY_Data\" folder\n%PersistentData% - \"AppData/LocalLow/SQUARE ENIX, Inc_/FINAL FANTASY\""));
+            _ExportDirectory = file.Bind(new ConfigDefinition("Magicite Paths", "Export Directory"), "%StreamingAssets%/MagiciteExport", new ConfigDescription("The export directory for extracting the game's files.\n\n Available replacements:\n%StreamingAssets% - StreamingAssets folder\n%DataPath% - \"FINAL FANTASY_Data\" folder\n%PersistentData% - \"AppData/LocalLow/SQUARE ENIX, Inc_/FINAL FANTASY\""));
             _ExportEnabled = file.Bind(new ConfigDefinition("General", "Export Enabled"), false, new ConfigDescription("Enable the export of the game's assets. This will automatically be set to false after a successful export."));
         }
         public string ImportDirectory => _ImportDirectory.Value.Replace("%StreamingAssets%", StreamingAssets).Replace("%DataPath%", DataPath).Replace("%PersistentData%", PersistentData);

@@ -38,6 +38,11 @@ namespace Magicite
                 Configuration = new Configuration();
                 Logger = this.Log;
                 Log.LogInfo("Loading...");
+                if(Paths.BepInExVersion.Major < 6 |
+                //don't check minor/patch because they're zero and should work going into later versions (or else I need to update anyways)
+                //I don't know the exact version, but 500 *should* be good enough of a filter
+                //this is gonna have to get updated eventually once IL2CPP gets a stable release
+                Convert.ToInt32(Paths.BepInExVersion.PreRelease.Split('.')[1]) <= 500) throw new Exception($"BepInEx BE version too low to run this plugin! Current Version: Major:{Paths.BepInExVersion.Major} Minor:{Paths.BepInExVersion.Minor} Patch:{Paths.BepInExVersion.Patch} PreRelease:{Paths.BepInExVersion.PreRelease}");
                 ClassInjector.RegisterTypeInIl2Cpp<ResourceCreator>(); //todo: make a more efficient method of injecting here (or move to BepInEx that auto-injects)
                 ClassInjector.RegisterTypeInIl2Cpp<ResourceExporter>();
                 String name = typeof(ResourceCreator).FullName;

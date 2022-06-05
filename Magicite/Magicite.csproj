@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173820</GameRegistryPath>
+    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173810</GameRegistryPath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">bin\FF3</GamePath>
@@ -81,6 +81,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="SemanticVersioning">
+      <HintPath>$(GamePath)\BepInEx\core\SemanticVersioning.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>$(GamePath)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>

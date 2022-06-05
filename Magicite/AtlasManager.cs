@@ -37,13 +37,34 @@ namespace Magicite
                 Il2CppReferenceArray<Sprite> sprites = new Sprite[atlas.spriteCount];//has to be of type Il2CppReferenceArray apparently
                 atlas.GetSprites(sprites);
                 //EntryPoint.Logger.LogInfo(sprites.ToList().Count);
+                List<string> keys = new List<string>();
+                foreach(string key in group.keys)
+                {
+                    keys.Add(key);
+                }
                 string outData = "";
                 foreach (Sprite spr in sprites.ToList())
                 {
                     if(spr != null)
                     {
                         string sprName = spr.name.Replace("(Clone)", "");
-                        string sprBase = Path.GetDirectoryName(group[sprName]);
+                        string sprBase = "";
+                        if (group.ContainsKey(sprName)) sprBase = Path.GetDirectoryName(group[sprName]);
+                        else
+                        {
+                            //likely a nested name like attribute/Icon
+                            //use linq to find matching
+                            var matches = keys.Where(x => x.Contains(sprName));
+                            //now iterate over these for the first one that does not already exist within our export directory
+                            foreach(string key in matches)
+                            {
+                                if(File.Exists(Path.Combine(ExportDirectory,Path.GetDirectoryName(group[key]),sprName) + ".spritedata"))
+                                {
+                                    sprBase = Path.GetDirectoryName(group[key]);
+                                    break;
+                                }
+                            }
+                        }
                         string texPath = sprBase + "/" + spr.texture.name;
                         string dataPath = sprBase + "/" + spr.name.Replace("(Clone)", "");
                         outData += $"{sprName};{dataPath}\n";
