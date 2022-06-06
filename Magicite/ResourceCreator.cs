@@ -230,9 +230,13 @@ namespace Magicite
         }
         public void GenOurFiles()
         {
+            if (!Directory.Exists(ImportDirectory))
+            {
+                EntryPoint.Logger.LogError($"Import directory \"{ImportDirectory}\" does not exist!");
+                return;
+            }
             List<string> mods = new List<string>();
             JsonDict baseAssetsPathData = new JsonDict();
-            List<string> groups = new List<string>();
             try
             {
                 System.Collections.Generic.List<string> mod = Directory.GetDirectories(ImportDirectory).ToList();
@@ -248,6 +252,8 @@ namespace Magicite
             }
             foreach(string mod in mods)
             {
+                //EntryPoint.Logger.LogInfo(Path.GetFileName(mod));
+                List<string> groups = new List<string>();
                 try
                 {
                     System.Collections.Generic.List<string> group = Directory.GetDirectories(mod).ToList();
@@ -270,13 +276,28 @@ namespace Magicite
                     {
                         keys.Add(File.ReadAllText(group + "/keys.json"));
                     }*/
+                    //EntryPoint.Logger.LogInfo(Path.GetFileName(group));
                     if (Directory.Exists(group + "/keys"))
                     {
-                        assetsPathData.keys.Add(Path.GetFileName(group));
-                        assetsPathData.values.Add(JsonHandling.ToJson(JsonHandling.MergeJsonDictsInPath(group + "/keys", Path.GetFileName(group))));
+                        if (assetsPathData.keys.Contains(Path.GetFileName(group)))
+                        {
+                            JsonDict present = JsonHandling.FromJson(assetsPathData.GetValue(Path.GetFileName(group)));
+                            present.MergeDict(JsonHandling.MergeJsonDictsInPath(Path.Combine(group, "keys"), Path.GetFileName(group)));
+                            assetsPathData.SetValue(Path.GetFileName(group), JsonHandling.ToJson(present));
+                            //EntryPoint.Logger.LogInfo("ContainsKey");
+                            //EntryPoint.Logger.LogInfo(JsonHandling.ToJson(present));
+                        }
+                        else
+                        {
+                            assetsPathData.SetValue(Path.GetFileName(group), JsonHandling.ToJson(JsonHandling.MergeJsonDictsInPath(Path.Combine(group, "keys"), Path.GetFileName(group))));
+                            //EntryPoint.Logger.LogInfo("KeyNotPresent");
+                            //EntryPoint.Logger.LogInfo(assetsPathData.GetValue(Path.GetFileName(group)));
+                        }
+
                     }
                 }
                 baseAssetsPathData.MergeDict(assetsPathData);
+                //EntryPoint.Logger.LogInfo(JsonHandling.ToJson(baseAssetsPathData));
             }
             String assetsPathtxt = JsonHandling.ToJson(baseAssetsPathData);    
             //EntryPoint.Logger.LogInfo(assetsPathtxt);

@@ -11,7 +11,7 @@ using UnityEngine.U2D;
 
 namespace Magicite
 {
-    public static class AtlasManager
+    public static class AtlasHolder
     {
         public static List<AtlasData> Atlases = new List<AtlasData>();
     }
@@ -36,7 +36,7 @@ namespace Magicite
 
                 Il2CppReferenceArray<Sprite> sprites = new Sprite[atlas.spriteCount];//has to be of type Il2CppReferenceArray apparently
                 atlas.GetSprites(sprites);
-                //EntryPoint.Logger.LogInfo(sprites.ToList().Count);
+                //il2cppsystem doesn't support linq, so just make the list
                 List<string> keys = new List<string>();
                 foreach(string key in group.keys)
                 {
@@ -56,9 +56,10 @@ namespace Magicite
                             //use linq to find matching
                             var matches = keys.Where(x => x.Contains(sprName));
                             //now iterate over these for the first one that does not already exist within our export directory
+                            //this could easily be inaccurate, but it should work well enough
                             foreach(string key in matches)
                             {
-                                if(File.Exists(Path.Combine(ExportDirectory,Path.GetDirectoryName(group[key]),sprName) + ".spritedata"))
+                                if(!File.Exists(Path.Combine(ExportDirectory,Path.GetDirectoryName(group[key]),sprName) + ".spritedata"))
                                 {
                                     sprBase = Path.GetDirectoryName(group[key]);
                                     break;
@@ -110,13 +111,14 @@ namespace Magicite
             return sprites.ToArray();
         }
     }
+
     [HarmonyPatch(typeof(SpriteAtlas),nameof(SpriteAtlas.GetSprite))]
     public sealed class SpriteAtlas_GetSprite
     {
         public static bool Prefix(string name, SpriteAtlas __instance,ref Sprite __result)
         {
             //EntryPoint.Logger.LogInfo("SpriteAtlas.GetSprite");
-            AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
+            AtlasData ad = AtlasHolder.Atlases.Find(x => x.Name == __instance.name);
             if(ad != null)
             {
                 __result = ad.GetSprite(name);
@@ -129,14 +131,15 @@ namespace Magicite
             }
         }
     }
+
     [HarmonyPatch(typeof(SpriteAtlas), nameof(SpriteAtlas.GetSprites), new Type[] { typeof(Il2CppReferenceArray<Sprite>)})]
     public sealed class SpriteAtlas_GetSprites
     {
         public static bool Prefix(ref Il2CppReferenceArray<Sprite> sprites, SpriteAtlas __instance, ref int __result)
         {
             //EntryPoint.Logger.LogInfo("SpriteAtlas.GetSprites");
-            //EntryPoint.Logger.LogInfo($"{AtlasManager.Atlases[0].Name} == {__instance.name} = {AtlasManager.Atlases[0].Name == __instance.name}");
-            AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
+            //EntryPoint.Logger.LogInfo($"{AtlasHolder.Atlases[0].Name} == {__instance.name} = {AtlasHolder.Atlases[0].Name == __instance.name}");
+            AtlasData ad = AtlasHolder.Atlases.Find(x => x.Name == __instance.name);
             //EntryPoint.Logger.LogInfo(ad.Name);
             if (ad != null)
             {
@@ -162,7 +165,7 @@ namespace Magicite
         public static void Postfix(SpriteAtlas __instance, ref int __result)
         {
             //EntryPoint.Logger.LogInfo("SpriteAtlas.spriteCount.getter");
-            AtlasData ad = AtlasManager.Atlases.Find(x => x.Name == __instance.name);
+            AtlasData ad = AtlasHolder.Atlases.Find(x => x.Name == __instance.name);
             if (ad != null)
             {
                 __result = ad.Sprites.Count;

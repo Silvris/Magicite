@@ -34,27 +34,33 @@ namespace Magicite
         }
         public string GetValue(string key)
         {
-            for(int i = 0; i < keys.Count; i++)
+            if(keys.Count > 0)
             {
-                if(keys[i] == key)
+                for (int i = 0; i < keys.Count; i++)
                 {
-                    return values[i];
+                    if (keys[i] == key)
+                    {
+                        return values[i];
+                    }
                 }
             }
             return string.Empty;
         }
         public void SetValue(string key, string value)
         {
-            for(int i = 0; i < keys.Count; i++)
+            if(keys.Count > 0)
             {
-                if(keys[i] == key)
+                for (int i = 0; i < keys.Count; i++)
                 {
-                    values[i] = value;
-                    return;
+                    if (keys[i] == key)
+                    {
+                        values[i] = value;
+                        return;
+                    }
                 }
             }
             keys.Add(key);
-            keys.Add(value);
+            values.Add(value);
         }
         public void MergeDict(JsonDict donor)
         {
@@ -65,23 +71,49 @@ namespace Magicite
                     keys.Add(key);
                     values.Add(donor.values[donor.keys.FindIndex(x => x == key)]);//if this fails..... I give up
                 }
+                else
+                {
+                    int index = keys.FindIndex(x => x == key);
+                    if(values[index][0] == '{') //i am cringe but i am free
+                    {
+                        JsonDict og = JsonHandling.FromJsonString(values[index]);
+                        JsonDict donors = JsonHandling.FromJsonString(donor.values[donor.keys.FindIndex(x => x == key)]);
+                        og.MergeDict(donors);
+                        values[index] = JsonHandling.ToJson(og);
+                    }
+                    else
+                    {
+                        //conflict? prefer donor
+                        values[index] = donor.GetValue(key);
+                    }
+
+                }
             }
         }
     }
     static class JsonHandling
     {
         public static JsonSerializerOptions options = new JsonSerializerOptions() { };
+        public static JsonDict FromJsonString(string data)
+        {
+            JsonDict obj = JsonSerializer.Deserialize<JsonDict>(data);
+            if (obj != null)
+            {
+                return obj;
+            }
+            else return new JsonDict();
+        }
+        public static JsonDict FromJson(string file)
+        {
+            return FromJsonString(File.ReadAllText(file));
+        }
         public static JsonDict MergeJsonDictsInPath(string path,string group)
         {
             JsonDict baseFile = new JsonDict();
             foreach (string file in Directory.GetFiles(path))
             {
+                baseFile.MergeDict(FromJson(file));
 
-                JsonDict obj = JsonSerializer.Deserialize<JsonDict>(File.ReadAllText(file));
-                if (obj != null)
-                {
-                    baseFile.MergeDict(obj);
-                }
             }
             //EntryPoint.Logger.LogInfo(group);
             return baseFile;

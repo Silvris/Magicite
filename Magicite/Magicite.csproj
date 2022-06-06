@@ -140,7 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncSpriteExport.cs" />
-    <Compile Include="AtlasManager.cs" />
+    <Compile Include="AtlasHolder.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="CSVData.cs" />
     <Compile Include="EntryPoint.cs" />

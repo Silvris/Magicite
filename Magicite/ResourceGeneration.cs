@@ -107,7 +107,7 @@ namespace Magicite
             //EntryPoint.Logger.LogInfo(atlas.name);
             //now generate the needed information for our Atlas functions to run
             AtlasData ad = new AtlasData(name, Path.GetDirectoryName(fullPath), ReadSpriteAtlas(File.ReadAllLines(fullPath), Regex.Replace(fullPath, "/Assets/GameAssets/.*$", "")));
-            AtlasManager.Atlases.Add(ad);
+            AtlasHolder.Atlases.Add(ad);
             atlas.hideFlags = HideFlags.HideAndDontSave;
             return atlas;
         }
