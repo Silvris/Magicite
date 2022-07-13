@@ -36,10 +36,11 @@ namespace Magicite
             }
 
         }
-        public static TextAsset CreateBinaryTextAsset(string fullPath)
+        public static TextAsset CreateBinaryTextAsset(string name ,string fullPath)
         {
-            TextAsset binary = new TextAsset("MAGI" + fullPath);
+            TextAsset binary = new TextAsset("MAGI" + fullPath) { name = name };
             binary.hideFlags = HideFlags.HideAndDontSave;
+            BinaryAssetManager.Instance.Register(name, fullPath);
             return binary;
         }
         public static Sprite CreateSprite(Texture2D tex,SpriteData sd)
@@ -188,6 +189,7 @@ namespace Magicite
 
         public static void ExportTexture(Texture2D asset, String fullPath)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
             if (asset.isReadable)
             {
                 WriteTextureToFile(asset, fullPath);

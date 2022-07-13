@@ -14,7 +14,7 @@ namespace Magicite
     [HarmonyPatch(nameof(TextAsset.bytes),MethodType.Getter)]
     public sealed class TextAsset_bytesPatch
     {
-        public static void Postfix(ref Il2CppStructArray<byte> __result)
+        public static void Postfix(ref Il2CppStructArray<byte> __result, TextAsset __instance)
         {
             if(__result.Length > 0)
             {
@@ -29,7 +29,8 @@ namespace Magicite
                             if (data.StartsWith("MAGI"))
                             {
                                 string path = data.Replace("MAGI", "");
-                                __result = File.ReadAllBytes(path);
+                                BinaryAsset asset = BinaryAssetManager.Instance.GetBinary(__instance.name);
+                                __result = asset.Data;
                             }
                         }
                     }

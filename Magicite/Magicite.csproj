@@ -141,6 +141,7 @@
   <ItemGroup>
     <Compile Include="AsyncSpriteExport.cs" />
     <Compile Include="AtlasHolder.cs" />
+    <Compile Include="BinaryAssetManager.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="CSVData.cs" />
     <Compile Include="EntryPoint.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="ResourceManager_IsLoadAssetCompleted.cs" />
     <Compile Include="SpriteData.cs" />
     <Compile Include="TextAsset_bytesPatch.cs" />
+    <Compile Include="TextAsset_dtorPatch.cs" />
     <Compile Include="TXTData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

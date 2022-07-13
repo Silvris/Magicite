@@ -88,7 +88,7 @@ namespace Magicite
             }
 
         }
-        public static UnityEngine.Object LoadAsset(string fullPath, string ext, Il2CppSystem.Object originalAsset)
+        public static UnityEngine.Object LoadAsset(string fullPath, string addressName, string ext, Il2CppSystem.Object originalAsset)
         {
             fullPath = fullPath.Replace("\\", "/");
             //EntryPoint.Logger.LogInfo(fullPath);
@@ -100,14 +100,18 @@ namespace Magicite
                     if (fullPath == "PartialAsset.csv" && originalAsset != null)
                     {
                         TextAsset text = originalAsset.Cast<TextAsset>();
-                        if (PartialAssets.ContainsKey(text.name))
+                        string name = "";
+                        if (text.name != String.Empty) name = text.name;
+                        else name = Path.GetFileName(addressName);
+                        if (PartialAssets.ContainsKey(name))
                         {
-                            CSVData partialData = (CSVData)PartialAssets[text.name];
-                            CSVData baseData = new CSVData(text.name, text);
+                            CSVData partialData = (CSVData)PartialAssets[name];
+                            CSVData baseData = new CSVData(name, text);
                             baseData.MergeAsset(partialData);
                             TextAsset t = baseData.ToAsset();
                             //EntryPoint.Logger.LogInfo(t.text);
-                            if (!OutputPartials.ContainsKey(text.name)) OutputPartials.Add(text.name,baseData);
+                            if (!OutputPartials.ContainsKey(name)) OutputPartials.Add(name,baseData);
+                            t.hideFlags = HideFlags.HideAndDontSave;
                             //if (!loadedFiles.ContainsKey(text.name)) loadedFiles.Add(text.name, t);
                             return t;
                         }
@@ -132,14 +136,17 @@ namespace Magicite
                     if(fullPath == "PartialAsset.txt" && originalAsset != null)
                     {
                         TextAsset text = originalAsset.Cast<TextAsset>();
-                        if (PartialAssets.ContainsKey(text.name))
+                        string name = "";
+                        if (text.name != String.Empty) name = text.name;
+                        else name = Path.GetFileName(addressName);
+                        if (PartialAssets.ContainsKey(name))
                         {
-                            TXTData partialData = (TXTData)PartialAssets[text.name];
-                            TXTData baseData = new TXTData(text.name, text);
+                            TXTData partialData = (TXTData)PartialAssets[name];
+                            TXTData baseData = new TXTData(name, text);
                             baseData.MergeAsset(partialData);
                             TextAsset t = baseData.ToAsset();
                             //EntryPoint.Logger.LogInfo(t.text);
-                            if(!OutputPartials.ContainsKey(text.name))OutputPartials.Add(text.name,baseData);
+                            if(!OutputPartials.ContainsKey(text.name))OutputPartials.Add(name,baseData);
                             t.hideFlags = HideFlags.HideAndDontSave;
                             return t;
                         }
@@ -203,10 +210,10 @@ namespace Magicite
                     //EntryPoint.Logger.LogInfo($"fullPath:{fullPath}, regex:{Regex.Replace(fullPath, "/Assets/GameAssets/.*$", "")}");
                     return ResourceGeneration.CreateSpriteAtlas(Path.GetFileNameWithoutExtension(fullPath), fullPath);
                 case ".bytes":
-                    TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(fullPath);
-                    binary.name = Path.GetFileNameWithoutExtension(fullPath);
+                    TextAsset binary = ResourceGeneration.CreateBinaryTextAsset(Path.GetFileNameWithoutExtension(fullPath),fullPath);
                     binary.hideFlags = HideFlags.HideAndDontSave;
                     return binary;
+                    
                 default:
                     EntryPoint.Logger.LogError($"Failed to load asset of type: {ext}");
                     return null;
@@ -391,7 +398,7 @@ namespace Magicite
                                         
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
-                                            UnityEngine.Object asset = LoadAsset(file, ext,resourceManager.completeAssetDic[kvp.value]);
+                                            UnityEngine.Object asset = LoadAsset(file, kvp.value, ext,resourceManager.completeAssetDic[kvp.value]);
                                             if(asset != null)
                                             {
                                                 //EntryPoint.Logger.LogInfo(asset);

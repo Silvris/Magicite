@@ -30,13 +30,13 @@ namespace Magicite
                     {
                         if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID()))
                         {
-                            __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath), __instance.completeAssetDic[addressName]);
+                            __instance.completeAssetDic[addressName] = ResourceCreator.LoadAsset(filePath, addressName, Path.GetExtension(filePath), __instance.completeAssetDic[addressName]);
                             if (__result == false) __result = true;
                         }
                     }
                     else
                     {
-                        __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath), null));
+                        __instance.completeAssetDic.Add(addressName, ResourceCreator.LoadAsset(filePath, addressName, Path.GetExtension(filePath), null));
                         if (__result == false) __result = true;
                     }
                 }

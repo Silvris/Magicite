@@ -37,7 +37,7 @@ namespace Magicite
                             if (!knownAssets.Contains(__instance.completeAssetDic[addressName].Cast<UnityEngine.Object>().GetInstanceID()))
                             {
                                 //EntryPoint.Logger.LogInfo("!KnownAssets");
-                                UnityEngine.Object asset = ResourceCreator.LoadAsset(filePath, Path.GetExtension(filePath), __instance.completeAssetDic[addressName]);
+                                UnityEngine.Object asset = ResourceCreator.LoadAsset(filePath, addressName, Path.GetExtension(filePath), __instance.completeAssetDic[addressName]);
                                 __instance.completeAssetDic[addressName] = asset;
                                 knownAssets.Add(asset.GetInstanceID());
                             }
