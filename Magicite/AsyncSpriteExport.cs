@@ -45,12 +45,12 @@ namespace Magicite
                         Sprite asset = handle.Result;
                         SpriteData.ExportFromSprite(asset, Path.Combine(_exportDirectory, AssetGroup, AssetPath + SpriteDataExt));
                         //handle.Release();
-                        EntryPoint.Logger.LogInfo($"Async sprite export succeeded for {AssetPath}: Status:{handle.Status}");
+                        EntryPoint.Logger.LogInfo((object)$"Async sprite export succeeded for {AssetPath}: Status:{handle.Status}");
                         IsExportFinish = true;
                     }
                     else
                     {
-                        EntryPoint.Logger.LogInfo($"Async sprite export failed for {AssetPath}: Status:{handle.Status}");
+                        EntryPoint.Logger.LogInfo((object)$"Async sprite export failed for {AssetPath}: Status:{handle.Status}");
                         //handle.Release();
                         IsExportFinish = true;
                     }

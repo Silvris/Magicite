@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.U2D;
+using Syldra;
 
 namespace Magicite
 {
@@ -20,44 +21,18 @@ namespace Magicite
         public static Dictionary<string,UnityEngine.Object> DonorAssets { get; set; }
         public static Texture2D ReadTextureFromFile(String fullPath, String Name)
         {
-            try
-            {
-                Byte[] bytes = File.ReadAllBytes(fullPath);
-                Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false) { name = Name };
-                texture.filterMode = FilterMode.Point;
-                if (!ImageConversion.LoadImage(texture, bytes))
-                    throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
-                texture.hideFlags = HideFlags.HideAndDontSave;
-                return texture;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return Syldra.Functions.ReadTextureFromFile(fullPath, Name);
 
         }
         public static TextAsset CreateBinaryTextAsset(string name ,string fullPath)
         {
             TextAsset binary = new TextAsset("MAGI" + fullPath) { name = name };
             binary.hideFlags = HideFlags.HideAndDontSave;
-            BinaryAssetManager.Instance.Register(name, fullPath);
             return binary;
         }
         public static Sprite CreateSprite(Texture2D tex,SpriteData sd)
         {
-            Sprite spr = Sprite.Create(
-                tex,
-                sd.hasRect ? sd.rect : new Rect(0, 0, tex.width, tex.height),
-                sd.hasPivot ? sd.pivot : new Vector2(0.5f, 0.5f),
-                sd.hasPPU ? sd.pixelsPerUnit : 1f,
-                0,
-                SpriteMeshType.Tight,
-                sd.hasBorder ? sd.border : new Vector4(0, 0, 0, 0)
-                );
-            tex.wrapMode = sd.hasWrap ? sd.wrapMode : TextureWrapMode.Clamp;
-            spr.name = sd.name;
-            spr.hideFlags = HideFlags.HideAndDontSave;
-            return spr;
+            return sd.CreateSpriteFromData(tex);
         }
         public static Dictionary<string,Sprite> ReadSpriteAtlas(string[] lines, string basePath)
         {
@@ -82,14 +57,14 @@ namespace Magicite
                         Texture2D tex;
                         if (sd.hasTO)
                         {
-                            EntryPoint.Logger.LogInfo(basePath + "/" + sd.textureOverride + ".png");
-                            tex = ReadTextureFromFile(Path.Combine(basePath,sd.textureOverride) + ".png", Path.GetFileName(sd.textureOverride));
+                            //EntryPoint.Logger.LogInfo(basePath + "/" + sd.textureOverride + ".png");
+                            spr = sd.CreateSpriteFromData(null,basePath);
                         }
                         else
                         {
                             tex = ReadTextureFromFile(path + ".png", name);
+                            spr = sd.CreateSpriteFromData(tex);
                         }
-                        spr = CreateSprite(tex, sd);
                         ResourceCreator.loadedFiles.Add(key, spr);
                     }
                     sds.Add(name, spr);
@@ -120,87 +95,5 @@ namespace Magicite
         }
     }
 
-    public static class TextureWriting
-    {
-        //thanks to Albeoris for these
-        public static Texture2D GetFragment(Texture2D texture, Int32 x, Int32 y, Int32 width, Int32 height)
-        {
-            if (texture == null)
-                return null;
-
-            Texture2D result = new Texture2D(width, height, texture.format, false);
-            Color[] colors = texture.GetPixels(x, y, width, height);
-            result.SetPixels(colors);
-            result.Apply();
-            return result;
-        }
-
-        public static Texture2D CopyAsReadable(Texture texture)
-        {
-            if (texture == null)
-                return null;
-
-            RenderTexture oldTarget = Camera.main.targetTexture;
-            RenderTexture oldActive = RenderTexture.active;
-
-            Texture2D result = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false);
-
-            RenderTexture rt = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32);
-            try
-            {
-                Camera.main.targetTexture = rt;
-                //Camera.main.Render();
-                Graphics.Blit(texture, rt);
-
-                RenderTexture.active = rt;
-                result.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
-            }
-            finally
-            {
-                RenderTexture.active = oldActive;
-                Camera.main.targetTexture = oldTarget;
-                RenderTexture.ReleaseTemporary(rt);
-            }
-
-            return result;
-        }
-
-        public static void WriteTextureToFile(Texture2D texture, String outputPath)
-        {
-            Byte[] data;
-            String extension = Path.GetExtension(outputPath);
-            switch (extension)
-            {
-                case ".png":
-                    data = ImageConversion.EncodeToPNG(texture);
-                    break;
-                case ".jpg":
-                    data = ImageConversion.EncodeToJPG(texture);
-                    break;
-                case ".tga":
-                    data = ImageConversion.EncodeToTGA(texture);
-                    break;
-                default:
-                    throw new NotSupportedException($"Not supported type [{extension}] of texture [{texture.name}]. Path: [{outputPath}]");
-            }
-
-            File.WriteAllBytes(outputPath, data);
-        }
-
-        public static void ExportTexture(Texture2D asset, String fullPath)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-            if (asset.isReadable)
-            {
-                WriteTextureToFile(asset, fullPath);
-            }
-            else
-            {
-                Texture2D readable = CopyAsReadable(asset);
-                WriteTextureToFile(readable, fullPath);
-                UnityEngine.Object.Destroy(readable);
-            }
-        }
-    }
 
 }

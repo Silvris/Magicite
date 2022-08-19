@@ -29,8 +29,8 @@ namespace Magicite
                             if (data.StartsWith("MAGI"))
                             {
                                 string path = data.Replace("MAGI", "");
-                                BinaryAsset asset = BinaryAssetManager.Instance.GetBinary(__instance.name);
-                                __result = asset.Data;
+                                __result = Il2CppSystem.IO.File.ReadAllBytes(path);
+
                             }
                         }
                     }

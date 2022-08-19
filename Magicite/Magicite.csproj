@@ -16,6 +16,7 @@
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">bin\FF3</GamePath>
+    <SyldraRepo>C:\Users\Owner\Documents\GitHub\Syldra</SyldraRepo>
     <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -137,11 +138,14 @@
       <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Syldra">
+      <HintPath>$(SyldraRepo)\Syldra\bin\Release\Syldra.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncSpriteExport.cs" />
     <Compile Include="AtlasHolder.cs" />
-    <Compile Include="BinaryAssetManager.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="CSVData.cs" />
     <Compile Include="EntryPoint.cs" />
@@ -154,9 +158,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager_CheckCompleteAsset.cs" />
     <Compile Include="ResourceManager_IsLoadAssetCompleted.cs" />
-    <Compile Include="SpriteData.cs" />
     <Compile Include="TextAsset_bytesPatch.cs" />
-    <Compile Include="TextAsset_dtorPatch.cs" />
     <Compile Include="TXTData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

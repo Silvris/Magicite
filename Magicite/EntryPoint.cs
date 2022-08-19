@@ -46,7 +46,7 @@ namespace Magicite
                 ClassInjector.RegisterTypeInIl2Cpp<ResourceCreator>(); //todo: make a more efficient method of injecting here (or move to BepInEx that auto-injects)
                 ClassInjector.RegisterTypeInIl2Cpp<ResourceExporter>();
                 String name = typeof(ResourceCreator).FullName;
-                Log.LogInfo($"Initializing in-game singleton: {name}");
+                Log.LogInfo((object)$"Initializing in-game singleton: {name}");
                 GameObject singleton = new GameObject(name);
                 singleton.hideFlags = HideFlags.HideAndDontSave;
                 GameObject.DontDestroyOnLoad(singleton);

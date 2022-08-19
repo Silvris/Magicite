@@ -83,7 +83,7 @@ namespace Magicite
             }
             catch (Exception ex)
             {
-                EntryPoint.Logger.LogInfo($"Error occured while exporting sprite {atlas.name}: {ex}");
+                EntryPoint.Logger.LogInfo((object)$"Error occured while exporting sprite {atlas.name}: {ex}");
                 return false;
             }
         }

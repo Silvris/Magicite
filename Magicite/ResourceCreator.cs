@@ -13,6 +13,7 @@ using Il2CppSystem.Threading;
 using BepInEx.IL2CPP.Utils.Collections;
 using System.Collections;
 using System.Text.RegularExpressions;
+using Syldra;
 
 namespace Magicite
 {
@@ -51,7 +52,7 @@ namespace Magicite
             }
             catch(Exception ex)
             {
-                EntryPoint.Logger.LogError($"[ResourceCreator].ctor:{ex}");
+                EntryPoint.Logger.LogError((object)$"[ResourceCreator].ctor:{ex}");
                 isDisabled = true;
             }
         }
@@ -110,7 +111,8 @@ namespace Magicite
                             baseData.MergeAsset(partialData);
                             TextAsset t = baseData.ToAsset();
                             //EntryPoint.Logger.LogInfo(t.text);
-                            if (!OutputPartials.ContainsKey(name)) OutputPartials.Add(name,baseData);
+                            if (!OutputPartials.ContainsKey(name)) OutputPartials.Add(name, baseData);
+                            else OutputPartials[name] = baseData;
                             t.hideFlags = HideFlags.HideAndDontSave;
                             //if (!loadedFiles.ContainsKey(text.name)) loadedFiles.Add(text.name, t);
                             return t;
@@ -145,8 +147,11 @@ namespace Magicite
                             TXTData baseData = new TXTData(name, text);
                             baseData.MergeAsset(partialData);
                             TextAsset t = baseData.ToAsset();
-                            //EntryPoint.Logger.LogInfo(t.text);
-                            if(!OutputPartials.ContainsKey(text.name))OutputPartials.Add(name,baseData);
+                            if (!OutputPartials.ContainsKey(name))
+                            {
+                                OutputPartials.Add(name, baseData);
+                            }
+                            else OutputPartials[name] = baseData;
                             t.hideFlags = HideFlags.HideAndDontSave;
                             return t;
                         }
@@ -215,7 +220,7 @@ namespace Magicite
                     return binary;
                     
                 default:
-                    EntryPoint.Logger.LogError($"Failed to load asset of type: {ext}");
+                    EntryPoint.Logger.LogError((object)(object)$"Failed to load asset of type: {ext}");
                     return null;
             }
         }
@@ -239,7 +244,7 @@ namespace Magicite
         {
             if (!Directory.Exists(ImportDirectory))
             {
-                EntryPoint.Logger.LogError($"Import directory \"{ImportDirectory}\" does not exist!");
+                EntryPoint.Logger.LogError((object)$"Import directory \"{ImportDirectory}\" does not exist!");
                 return;
             }
             List<string> mods = new List<string>();
@@ -254,7 +259,7 @@ namespace Magicite
             }
             catch (Exception ex)
             {
-                EntryPoint.Logger.LogError($"[ResourceCreator.AddFiles]: {ex}");
+                EntryPoint.Logger.LogError((object)$"[ResourceCreator.AddFiles]: {ex}");
                 return;
             }
             foreach(string mod in mods)
@@ -271,7 +276,7 @@ namespace Magicite
                 }
                 catch (Exception ex)
                 {
-                    EntryPoint.Logger.LogError($"[ResourceCreator.AddFiles]: {ex}");
+                    EntryPoint.Logger.LogError((object)$"[ResourceCreator.AddFiles]: {ex}");
                     return;
                 }
                 JsonDict assetsPathData = new JsonDict();
@@ -395,7 +400,6 @@ namespace Magicite
                                     {
                                         OurFilePaths.Add(kvp.value,file);
                                         //EntryPoint.Logger.LogInfo(file);
-                                        
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
                                             UnityEngine.Object asset = LoadAsset(file, kvp.value, ext,resourceManager.completeAssetDic[kvp.value]);
