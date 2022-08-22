@@ -24,6 +24,7 @@ namespace Magicite
         public static string ImportDirectory { get; set; }
         public static Dictionary<String, Dictionary<String, String>> OurFiles { get; set; }
         public static Dictionary<String, UnityEngine.Object> loadedFiles { get; set; }
+        public static System.Collections.Generic.List<object> loaded { get; set; }
         public static Dictionary<String,String> OurFilePaths { get; set; }
         public static System.Collections.Generic.Dictionary<String,PartialAsset> PartialAssets { get; set; }
         public static System.Collections.Generic.Dictionary<String, PartialAsset> OutputPartials { get; set; }
@@ -43,6 +44,7 @@ namespace Magicite
                 OurFilePaths = new Dictionary<string, string>();
                 ImportDirectory = EntryPoint.Configuration.ImportDirectory;
                 loadedFiles = new Dictionary<string, UnityEngine.Object>();
+                loaded = new System.Collections.Generic.List<object>();
                 PartialAssets = new System.Collections.Generic.Dictionary<string, PartialAsset>();
                 OutputPartials = new System.Collections.Generic.Dictionary<string, PartialAsset>();
                 if (EntryPoint.Configuration.ExportEnabled)
@@ -195,7 +197,12 @@ namespace Magicite
                 case ".spritedata":
 
                     //spritedata likely with texture override, allowing for sprite sheet use
-                    SpriteData sa = new SpriteData(File.ReadAllLines(fullPath), Path.GetFileNameWithoutExtension(fullPath));
+                    string[] strings = File.ReadAllLines(fullPath);
+                    EntryPoint.Logger.LogInfo(strings.Length);
+                    EntryPoint.Logger.LogInfo(fullPath);
+                    SpriteData sa = new SpriteData(strings, Path.GetFileNameWithoutExtension(fullPath));
+                    loaded.Add(sa);
+                    
                     if (sa.hasTO)
                     {
                         //spritedata defines texture to use
@@ -340,7 +347,7 @@ namespace Magicite
                                 List<string> files = new List<string>();
                                 foreach(string dir in directories)
                                 {
-                                    if (Directory.Exists(Path.Combine(ImportDirectory, dir, group.key)))
+                                    if (Directory.Exists(Path.Combine(ImportDirectory, dir, group.key, Path.GetDirectoryName(kvp.value))))
                                     {
                                         var fileGrab = Directory.GetFiles(Path.Combine(ImportDirectory, dir, group.key), $"{kvp.value}.*", SearchOption.AllDirectories);
 

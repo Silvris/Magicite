@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Syldra;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,7 +72,7 @@ namespace Magicite
                         outData += $"{sprName};{dataPath}\n";
                         if (!textures.Contains(spr.texture))
                         {
-                            TextureWriting.ExportTexture(spr.texture, Path.Combine(ExportDirectory,texPath + ".png"));
+                            Functions.ExportTexture(spr.texture, Path.Combine(ExportDirectory,texPath + ".png"));
                             textures.Add(spr.texture);
                         }
                         SpriteData.ExportFromSprite(spr, Path.Combine(ExportDirectory,dataPath + ".spritedata"), true,texPath);//texPath gets generated regardless if the tex is already exported
@@ -97,6 +98,7 @@ namespace Magicite
             }
             else
             {
+                EntryPoint.Logger.LogWarning((object)$"Atlas: {Name} does not have sprite: {name}");
                 return Sprite.Create(new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
             }
         }
