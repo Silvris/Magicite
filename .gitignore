@@ -340,5 +340,4 @@ ASALocalRun/
 healthchecksdb
 
 #Release directory
-BepInEx/
 *.zip
