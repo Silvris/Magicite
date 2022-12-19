@@ -28,6 +28,7 @@ namespace Magicite
         private DateTime _loadingLogTime;
         private Int32 _currentIndex;
         private Int32 _totalCount = 1;
+        private Int32 _errorCount = 0;
         private Texture2D _blackTexture;
         private GUIStyle _guiStyle;
         private bool _exportEnabled;
@@ -125,33 +126,41 @@ namespace Magicite
                     Dictionary<String, Il2CppSystem.Object> loaded = _resourceManager.completeAssetDic;
                     foreach (var pair in assets)
                     {
-                        String assetName = pair.Key;
-                        String assetPath = pair.Value;
-                        while (!_resourceManager.CheckLoadAssetCompleted(assetPath))
+                        try
                         {
-                            elapsedTime = DateTime.Now - _loadingStartTime;
-                            EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex} / {_totalCount})] Waiting for {assetName} to load. Elapsed: {elapsedTime.TotalSeconds} sec.");
-                            _loadingLogTime = DateTime.Now;
-                        }
+                            String assetName = pair.Key;
+                            String assetPath = pair.Value;
+                            while (!_resourceManager.CheckLoadAssetCompleted(assetPath))
+                            {
+                                elapsedTime = DateTime.Now - _loadingStartTime;
+                                EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex} / {_totalCount})] Waiting for {assetName} to load. Elapsed: {elapsedTime.TotalSeconds} sec.");
+                                _loadingLogTime = DateTime.Now;
+                            }
 
-                        Il2CppSystem.Object asset = loaded[assetPath];
-                        if (asset is null)
+                            Il2CppSystem.Object asset = loaded[assetPath];
+                            if (asset is null)
+                            {
+                                EntryPoint.Logger.LogError((object)$"[Export ({_currentIndex} / {_totalCount})] \tCannot find asset [{assetName}]: {assetPath}");
+                                continue;
+                            }
+
+                            String extension = GetFileExtension(assetPath);
+                            String type = GetAssetType(asset);
+                            if (type == "UnityEngine.Texture2D")
+                            {
+                                AsyncSpriteExport spr = new AsyncSpriteExport(assetPath, assetGroup);
+                                spriteExports.Add(spr);
+                                EntryPoint.Logger.LogInfo((object)$"Starting async sprite export for {assetName} in {assetGroup}");
+                            }
+                            String exportPath = assetPath + extension;
+
+                            ExportAsset(asset, type, assetName, assetGroup, exportPath, assets);
+                        }
+                        catch(Exception ex)
                         {
-                            EntryPoint.Logger.LogError((object)$"[Export ({_currentIndex} / {_totalCount})] \tCannot find asset [{assetName}]: {assetPath}");
+                            OnExportError($"Error occurred during export of asset [{pair.key}]",ex,false);
                             continue;
                         }
-
-                        String extension = GetFileExtension(assetPath);
-                        String type = GetAssetType(asset);
-                        if(type == "UnityEngine.Texture2D")
-                        {
-                            AsyncSpriteExport spr = new AsyncSpriteExport(assetPath, assetGroup);
-                            spriteExports.Add(spr);
-                            EntryPoint.Logger.LogInfo((object)$"Starting async sprite export for {assetName} in {assetGroup}");
-                        }
-                        String exportPath = assetPath + extension;
-
-                        ExportAsset(asset, type, assetName, assetGroup, exportPath, assets);
                     }
 
                     //_resourceManager.DestroyGroupAsset(assetGroup);
@@ -195,7 +204,7 @@ namespace Magicite
         }
         private void EndExport()
         {
-            EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex} / {_totalCount})] Assets exported successfully.");
+            EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex - _errorCount} / {_totalCount})] Assets exported successfully.");
             EntryPoint.Configuration.DisableExport();
             Destroy(this);
         }
@@ -280,10 +289,11 @@ namespace Magicite
         {
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
         }
-        public void OnExportError(string message,Exception ex)
+        public void OnExportError(string message,Exception ex, bool isFatal = true)
         {
             EntryPoint.Logger.LogInfo((object)$"{message}: {ex}");
-            Destroy(this);
+            if (isFatal) Destroy(this);
+            else _errorCount++;
         }
 
         public void OnDisable()
