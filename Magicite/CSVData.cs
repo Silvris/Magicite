@@ -12,7 +12,7 @@ namespace Magicite
     {
         public string Name;
         public Dictionary<string, string> entries;
-        public static Regex RegexTarget = new Regex("(\\d+),([\\s\\S]+)");
+        public static Regex RegexTarget = new Regex("(\\d+) *,([\\s\\S]+)");
         public string key = "";
 
         public CSVData(string name, TextAsset asset)
