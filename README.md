@@ -2,9 +2,9 @@
 A BepInEx plugin for the FINAL FANTASY PIXEL REMASTERS that allows for the loading of new assets and replacement of existing assets
 
 # Installation:
-1. Install an IL2CPP Bleeding-Edge build of BepInEx 6, which can be found [here](https://builds.bepis.io/projects/bepinex_be) or used from a prior Memoria installation
-2. Drop the BepInEx folder from the mod into the game's main directory and merge folders if prompted
-3. Run the game to generate the configuration file, create the import directory if it does not already exist, and then place any further mods to designated path in the config file.
+1. Download the BepInEx Version "BepInEx_UnityIL2CPP_x64_3a54f7e_6.0.0-be.571" (later versions will no longer work), which can be found [here](https://builds.bepinex.dev/projects/bepinex_be/571/BepInEx_UnityIL2CPP_x64_3a54f7e_6.0.0-be.571.zip) or used from a prior Memoria installation
+2. Extract all files into the main Final Fantasy Pixel Remaster folder.
+3. Run the game to generate the configuration file located in BepInEx/config labeled "silvris.magicite.conf". Also create the "/StreamingAssets/Magicite" directory if it does not already exist, and place any Magicite mods within this folder. Each Magicite mod should have its own designated named folder that contains the contents.
 
 # Creating Mods for Magicite:
 Each file within the Pixel Remasters is given a "group" entry and then a full path to the file. 
