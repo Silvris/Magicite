@@ -1,165 +1,105 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1FE023F6-09E2-4B20-8B52-945FC1D2F240}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Magicite</RootNamespace>
-    <AssemblyName>Magicite</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173820</GameRegistryPath>
-    <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
-    <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
-    <GamePath Condition="'$(GamePath)' == ''">bin\FF3</GamePath>
-    <SyldraRepo>C:\Users\silve\Documents\GitHub\Syldra</SyldraRepo>
-    <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	  <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173810</GameRegistryPath>
+	  <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
+	  <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
+	  <GamePath Condition="'$(GamePath)' == ''">bin\FF3</GamePath>
+	  <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
+	  <OutputPath Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">release\BepInEx\plugins\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Memory">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Text.Json">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\..\Syldra\Syldra\Syldra.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>$(GamePath)\BepInEx\core\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BepInEx.Core">
-      <HintPath>$(GamePath)\BepInEx\core\BepInEx.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BepInEx.IL2CPP">
-      <HintPath>$(GamePath)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BepInEx.Preloader.Core">
-      <HintPath>$(GamePath)\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Il2CppSystem.Core">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Core" />
-    <Reference Include="SemanticVersioning">
-      <HintPath>$(GamePath)\BepInEx\core\SemanticVersioning.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnhollowerBaseLib">
-      <HintPath>$(GamePath)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Addressables">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Unity.Addressables.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.InputSystem">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Unity.InputSystem.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.AssetBundleModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.InputLegacyModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.InputModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.InputModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.JSONSerializeModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ResourceManager">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\Unity.ResourceManager.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Syldra">
-      <HintPath>$(SyldraRepo)\Syldra\bin\Release\Syldra.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+	<Reference Include="0Harmony">
+		<HintPath>$(GamePath)\BepInEx\core\0Harmony.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Assembly-CSharp">
+		<HintPath>$(GamePath)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="BepInEx.Core">
+		<HintPath>$(GamePath)\BepInEx\core\BepInEx.Core.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="BepInEx.Unity.IL2CPP">
+		<HintPath>$(GamePath)\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="BepInEx.Preloader.Core">
+		<HintPath>$(GamePath)\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Il2Cppmscorlib">
+		<HintPath>$(GamePath)\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Il2CppSystem.Core">
+		<HintPath>$(GamePath)\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="SemanticVersioning">
+		<HintPath>$(GamePath)\BepInEx\core\SemanticVersioning.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Il2CppInterop.Runtime">
+		<HintPath>$(GamePath)\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Unity.Addressables">
+		<HintPath>$(GamePath)\BepInEx\interop\Unity.Addressables.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="Unity.InputSystem">
+		<HintPath>$(GamePath)\BepInEx\interop\Unity.InputSystem.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.AssetBundleModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.AssetBundleModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.CoreModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.ImageConversionModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.ImageConversionModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.IMGUIModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.InputLegacyModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.InputModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.InputModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.JSONSerializeModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.JSONSerializeModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.ResourceManager">
+		<HintPath>$(GamePath)\BepInEx\interop\Unity.ResourceManager.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
+	<Reference Include="UnityEngine.TextRenderingModule">
+		<HintPath>$(GamePath)\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+		<Private>False</Private>
+	</Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AsyncSpriteExport.cs" />
-    <Compile Include="AtlasHolder.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="CSVData.cs" />
-    <Compile Include="EntryPoint.cs" />
-    <Compile Include="JsonHandling.cs" />
-    <Compile Include="Content_CreateMaster.cs" />
-    <Compile Include="PartialAsset.cs" />
-    <Compile Include="ResourceCreator.cs" />
-    <Compile Include="ResourceExporter.cs" />
-    <Compile Include="ResourceGeneration.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResourceManager_CheckCompleteAsset.cs" />
-    <Compile Include="ResourceManager_IsLoadAssetCompleted.cs" />
-    <Compile Include="TextAsset_bytesPatch.cs" />
-    <Compile Include="TXTData.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

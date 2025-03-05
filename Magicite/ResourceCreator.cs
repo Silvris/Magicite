@@ -5,13 +5,8 @@ using BepInEx.IL2CPP;
 using System.IO;
 using System.Linq;
 //using System.Text.Json;
-using Il2CppSystem.Threading.Tasks;
-//using System.Web.Script.Serialization;
 using UnityEngine;
 using Il2CppSystem.Asset;
-using Il2CppSystem.Threading;
-using BepInEx.IL2CPP.Utils.Collections;
-using System.Collections;
 using System.Text.RegularExpressions;
 using Syldra;
 
@@ -20,12 +15,12 @@ namespace Magicite
     public sealed class ResourceCreator : MonoBehaviour
     {
         public static ResourceManager resourceManager { get; private set; }
-        public static Dictionary<string, Dictionary<string, string>> pathMatch { get; private set; }
+        public static Il2CppSystem.Collections.Generic.Dictionary<string, Il2CppSystem.Collections.Generic.Dictionary<string, string>> pathMatch { get; private set; }
         public static string ImportDirectory { get; set; }
-        public static Dictionary<String, Dictionary<String, String>> OurFiles { get; set; }
-        public static Dictionary<String, UnityEngine.Object> loadedFiles { get; set; }
+        public static Il2CppSystem.Collections.Generic.Dictionary<String, Il2CppSystem.Collections.Generic.Dictionary<String, String>> OurFiles { get; set; }
+        public static System.Collections.Generic.Dictionary<String, UnityEngine.Object> loadedFiles { get; set; }
         public static System.Collections.Generic.List<object> loaded { get; set; }
-        public static Dictionary<String,String> OurFilePaths { get; set; }
+        public static System.Collections.Generic.Dictionary<String,String> OurFilePaths { get; set; }
         public static System.Collections.Generic.Dictionary<String,PartialAsset> PartialAssets { get; set; }
         public static System.Collections.Generic.Dictionary<String, PartialAsset> OutputPartials { get; set; }
         private bool isDisabled = false;
@@ -40,10 +35,10 @@ namespace Magicite
         {
             try
             {
-                OurFiles = new Dictionary<string, Dictionary<string, string>>(); // set to a instance to not crash when disabled
-                OurFilePaths = new Dictionary<string, string>();
+                OurFiles = new Il2CppSystem.Collections.Generic.Dictionary<string, Il2CppSystem.Collections.Generic.Dictionary<string, string>>(); // set to a instance to not crash when disabled
+                OurFilePaths = new System.Collections.Generic.Dictionary<string, string>();
                 ImportDirectory = EntryPoint.Configuration.ImportDirectory;
-                loadedFiles = new Dictionary<string, UnityEngine.Object>();
+                loadedFiles = new System.Collections.Generic.Dictionary<string, UnityEngine.Object>();
                 loaded = new System.Collections.Generic.List<object>();
                 PartialAssets = new System.Collections.Generic.Dictionary<string, PartialAsset>();
                 OutputPartials = new System.Collections.Generic.Dictionary<string, PartialAsset>();
@@ -91,7 +86,7 @@ namespace Magicite
             }
 
         }
-        public static UnityEngine.Object LoadAsset(string fullPath, string addressName, string ext, Il2CppSystem.Object originalAsset)
+        public static UnityEngine.Object? LoadAsset(string fullPath, string addressName, string ext, Il2CppSystem.Object originalAsset)
         {
             fullPath = fullPath.Replace("\\", "/");
             //EntryPoint.Logger.LogInfo(fullPath);
@@ -254,7 +249,7 @@ namespace Magicite
                 EntryPoint.Logger.LogError((object)$"Import directory \"{ImportDirectory}\" does not exist!");
                 return;
             }
-            List<string> mods = new List<string>();
+            System.Collections.Generic.List<string> mods = new System.Collections.Generic.List<string>();
             JsonDict baseAssetsPathData = new JsonDict();
             try
             {
@@ -272,7 +267,7 @@ namespace Magicite
             foreach(string mod in mods)
             {
                 //EntryPoint.Logger.LogInfo(Path.GetFileName(mod));
-                List<string> groups = new List<string>();
+                System.Collections.Generic.List<string> groups = new System.Collections.Generic.List<string>();
                 try
                 {
                     System.Collections.Generic.List<string> group = Directory.GetDirectories(mod).ToList();
@@ -327,11 +322,11 @@ namespace Magicite
             if (OurFiles != null)
             {
                 //kinda assuming it'll return null if the data is wrong
-                foreach (KeyValuePair<string, Dictionary<string, string>> group in OurFiles)
+                foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, Il2CppSystem.Collections.Generic.Dictionary<string, string>> group in OurFiles)
                 {
                     //EntryPoint.Logger.LogInfo(group.Key);
-                    List<KeyValuePair<string, string>> removes = new List<KeyValuePair<string, string>>();
-                    foreach (KeyValuePair<string, string> kvp in group.Value)
+                    System.Collections.Generic.List<Il2CppSystem.Collections.Generic.KeyValuePair<string, string>> removes = new System.Collections.Generic.List<Il2CppSystem.Collections.Generic.KeyValuePair<string, string>>();
+                    foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, string> kvp in group.Value)
                     {
                         //EntryPoint.Logger.LogInfo(kvp.Key);
                         if (!loadedFiles.ContainsKey(kvp.value)) //this allows us to register sprites loaded by atlas generation, and then ignore them here
@@ -344,7 +339,7 @@ namespace Magicite
                             //EntryPoint.Logger.LogInfo(Path.GetDirectoryName(Path.Combine(ImportDirectory, group.key, kvp.value)));
                             if (true)
                             {
-                                List<string> files = new List<string>();
+                                System.Collections.Generic.List<string> files = new System.Collections.Generic.List<string>();
                                 foreach(string dir in directories)
                                 {
                                     if (Directory.Exists(Path.Combine(ImportDirectory, dir, group.key, Path.GetDirectoryName(kvp.value))))
@@ -409,7 +404,7 @@ namespace Magicite
                                         //EntryPoint.Logger.LogInfo(file);
                                         if (resourceManager.completeAssetDic.ContainsKey(kvp.value))
                                         {
-                                            UnityEngine.Object asset = LoadAsset(file, kvp.value, ext,resourceManager.completeAssetDic[kvp.value]);
+                                            UnityEngine.Object? asset = LoadAsset(file, kvp.value, ext,resourceManager.completeAssetDic[kvp.value]);
                                             if(asset != null)
                                             {
                                                 //EntryPoint.Logger.LogInfo(asset);
@@ -429,14 +424,14 @@ namespace Magicite
                         }
 
                     }
-                    foreach (KeyValuePair<string, string> kvp in removes)
+                    foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, string> kvp in removes)
                     {
                         group.Value.Remove(kvp.key);
                     }
                     if (pathMatch.ContainsKey(group.key))
                     {
-                        Dictionary<string, string> currentData = pathMatch[group.key];
-                        foreach (KeyValuePair<string, string> kvp in group.value)
+                        Il2CppSystem.Collections.Generic.Dictionary<string, string> currentData = pathMatch[group.key];
+                        foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, string> kvp in group.value)
                         {
                             if (currentData.ContainsKey(kvp.key))
                             {

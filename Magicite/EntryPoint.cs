@@ -1,5 +1,5 @@
 ﻿using BepInEx;
-using BepInEx.IL2CPP;
+using BepInEx.Unity.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
@@ -9,14 +9,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using UnhollowerRuntimeLib;
+using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.U2D;
 
 namespace Magicite
 {
-    [BepInPlugin("silvris.magicite", "Magicite Loader", "2.1.0.0")]
+    [BepInPlugin("silvris.magicite", "Magicite Loader", "2.2.0.0")]
     [BepInDependency("ffpr.Syldra")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]

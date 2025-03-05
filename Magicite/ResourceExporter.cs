@@ -22,8 +22,8 @@ namespace Magicite
         public static ResourceExporter Instance { get; set; }
         private String _exportDirectory;
         private ResourceManager _resourceManager;
-        private Dictionary<String, Dictionary<String, String>>.Enumerator _enumerator;
-        private KeyValuePair<String, Dictionary<String, String>> _currentGroup;
+        private Il2CppSystem.Collections.Generic.Dictionary<String, Il2CppSystem.Collections.Generic.Dictionary<String, String>>.Enumerator _enumerator;
+        private Il2CppSystem.Collections.Generic.KeyValuePair<String, Il2CppSystem.Collections.Generic.Dictionary<String, String>>? _currentGroup;
         private DateTime _loadingStartTime;
         private DateTime _loadingLogTime;
         private Int32 _currentIndex;
@@ -81,7 +81,7 @@ namespace Magicite
                 {
                     if (!_resourceManager.CheckLoadAssetCompleted("AssetsPath"))
                         return;
-                    Dictionary<String, Dictionary<String, String>> pathMatch = null;
+                    Il2CppSystem.Collections.Generic.Dictionary<String, Il2CppSystem.Collections.Generic.Dictionary<String, String>>? pathMatch = null;
                     if (pathMatch is null)
                     {
                         pathMatch = AssetBundlePathMatch.Instance.originalData;
@@ -120,10 +120,10 @@ namespace Magicite
                     }
                     
                     elapsedTime = DateTime.Now - _loadingStartTime;
-                    Dictionary<String, String> assets = _currentGroup.Value;
+                    Il2CppSystem.Collections.Generic.Dictionary<String, String> assets = _currentGroup.Value;
                     EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex} / {_totalCount})] Loaded {assets.Count} assets from [{assetGroup}] in {elapsedTime.TotalSeconds} sec. Exporting...");
                     ExportKeysDict(assets, Path.Combine(_exportDirectory, assetGroup, "keys","Export.json"));
-                    Dictionary<String, Il2CppSystem.Object> loaded = _resourceManager.completeAssetDic;
+                    Il2CppSystem.Collections.Generic.Dictionary<String, Il2CppSystem.Object> loaded = _resourceManager.completeAssetDic;
                     foreach (var pair in assets)
                     {
                         try
@@ -208,7 +208,7 @@ namespace Magicite
             EntryPoint.Configuration.DisableExport();
             Destroy(this);
         }
-        private void ExportAsset(Il2CppSystem.Object asset, string type, string assetName,string group, string exportPath, Dictionary<string,string> groupData)
+        private void ExportAsset(Il2CppSystem.Object asset, string type, string assetName,string group, string exportPath, Il2CppSystem.Collections.Generic.Dictionary<string, string> groupData)
         {
             string fullPath = Path.Combine(_exportDirectory, group, exportPath);
             //EntryPoint.Logger.LogInfo($"{assetName}:{type}:{asset.GetIl2CppType().Name}");
@@ -236,7 +236,7 @@ namespace Magicite
                     break;
             }
         }
-        private void ExportAtlas(SpriteAtlas asset, string fullPath, Dictionary<string,string> groupData, string groupName)
+        private void ExportAtlas(SpriteAtlas asset, string fullPath, Il2CppSystem.Collections.Generic.Dictionary<string, string> groupData, string groupName)
         {
             EntryPoint.Logger.LogInfo((object)$"[Export ({_currentIndex} / {_totalCount})] \tExport [{asset.name}] SpriteAtlas {fullPath}");
             PrepareDirectory(fullPath);
@@ -279,7 +279,7 @@ namespace Magicite
             PrepareDirectory(fullPath);
             File.WriteAllText(fullPath,asset.text);
         }
-        private void ExportKeysDict(Dictionary<string,string> dict,string fullPath)
+        private void ExportKeysDict(Il2CppSystem.Collections.Generic.Dictionary<string, string> dict,string fullPath)
         {
             PrepareDirectory(fullPath);
             JsonDict jDict = new JsonDict(dict);
@@ -356,7 +356,8 @@ namespace Magicite
 
             Single progress = (100.0f * _currentIndex) / _totalCount;
             GUI.Label(new Rect(0, 0, Screen.width, Screen.height), $"Exporting ({progress:F2}%): {_currentIndex} / {_totalCount}", _guiStyle);
-            GUI.Label(new Rect(0, 50, Screen.width, Screen.height), $"Group: {_currentGroup.Key}", _guiStyle);
+            if (_currentGroup != null)
+                GUI.Label(new Rect(0, 50, Screen.width, Screen.height), $"Group: {_currentGroup.Key}", _guiStyle);
         }
     }
 }
